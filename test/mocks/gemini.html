@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mock Gemini</title>
+</head>
+<body>
+  <!-- Left sidebar navigation -->
+  <nav>
+    <button>New chat</button>
+    <div class="chats-section">
+      <h3>Chats</h3>
+      <a href="/app/abc123def456">Travel planning ideas</a>
+      <a href="/app/ghi789jkl012">Recipe suggestions</a>
+      <a href="/app/mno345pqr678">Workout routine</a>
+      <a href="/app/stu901vwx234">Home improvement tips</a>
+    </div>
+  </nav>
+
+  <!-- Main content area -->
+  <main>
+    <h1>Conversation with Gemini</h1>
+
+    <div class="conversation">
+      <!-- User prompt -->
+      <div class="turn user-turn">
+        <div class="prompt-content" data-md>
+          You
+          Plan a 5-day trip to Japan focusing on culture and food
+        </div>
+      </div>
+
+      <!-- Gemini response -->
+      <div class="turn assistant-turn">
+        <div class="response-content" data-md>
+          <p>I'd be happy to help you plan an amazing cultural and culinary journey through Japan! Here's a suggested 5-day itinerary:</p>
+
+          <h3>Day 1-2: Tokyo</h3>
+          <ul>
+            <li>Visit Senso-ji Temple in Asakusa</li>
+            <li>Explore Tsukiji Outer Market for fresh sushi</li>
+            <li>Experience a traditional tea ceremony</li>
+          </ul>
+
+          <h3>Day 3: Kyoto</h3>
+          <ul>
+            <li>Tour Fushimi Inari shrine</li>
+            <li>Walk through Gion district</li>
+            <li>Try kaiseki multi-course dinner</li>
+          </ul>
+
+          <h3>Day 4-5: Osaka</h3>
+          <ul>
+            <li>Street food tour in Dotonbori</li>
+            <li>Visit Osaka Castle</li>
+            <li>Try takoyaki and okonomiyaki</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- User follow-up -->
+      <div class="turn user-turn">
+        <div class="prompt-content" data-md>
+          You
+          What's the best time of year to visit?
+        </div>
+      </div>
+
+      <!-- Gemini response -->
+      <div class="turn assistant-turn">
+        <div class="response-content" data-md>
+          <p>The best times to visit Japan are:</p>
+          <ul>
+            <li><strong>Spring (March-May)</strong>: Cherry blossom season, mild weather</li>
+            <li><strong>Fall (September-November)</strong>: Beautiful autumn foliage, comfortable temperatures</li>
+          </ul>
+          <p>Avoid Golden Week (late April/early May) and Obon (mid-August) when travel is crowded and expensive.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Simulate Gemini's URL structure
+    if (!window.location.pathname.includes('/app/')) {
+      history.replaceState({}, '', '/app/abc123def456');
+    }
+  </script>
+</body>
+</html>

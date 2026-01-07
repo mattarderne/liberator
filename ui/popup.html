@@ -1,0 +1,1038 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Liberator</title>
+    <style>
+      :root {
+        --bg-base: #1a1a1c;
+        --bg-surface: #232326;
+        --bg-elevated: #2a2a2e;
+        --bg-hover: #333338;
+        --border-subtle: #3a3a40;
+        --border-default: #48484f;
+        --text-primary: #f0f0f2;
+        --text-secondary: #a0a0a8;
+        --text-muted: #68686f;
+        --accent-primary: #6b8afd;
+        --accent-hover: #8aa4ff;
+        --provider-chatgpt: #10a37f;
+        --provider-claude: #d4a574;
+        --provider-gemini: #4285f4;
+        --provider-grok: #1d9bf0;
+        --provider-copilot: #9b5de5;
+      }
+
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background: var(--bg-base);
+        color: var(--text-primary);
+        min-width: 420px;
+        max-width: 500px;
+        max-height: 580px;
+        overflow: hidden;
+        font-size: 13px;
+      }
+
+      /* Header */
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border-subtle);
+        background: var(--bg-surface);
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        font-size: 14px;
+      }
+
+      .logo svg {
+        width: 20px;
+        height: 20px;
+        color: var(--accent-primary);
+      }
+
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .icon-btn {
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        cursor: pointer;
+        padding: 6px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .icon-btn:hover {
+        background: var(--bg-hover);
+        color: var(--text-primary);
+      }
+
+      /* Tabs */
+      .tabs {
+        display: flex;
+        border-bottom: 1px solid var(--border-subtle);
+        background: var(--bg-surface);
+        padding: 0 16px;
+      }
+
+      .tab {
+        padding: 10px 16px;
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--text-muted);
+        background: none;
+        border: none;
+        cursor: pointer;
+        position: relative;
+        transition: color 0.15s;
+      }
+
+      .tab:hover {
+        color: var(--text-secondary);
+      }
+
+      .tab.active {
+        color: var(--text-primary);
+      }
+
+      .tab.active::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--accent-primary);
+      }
+
+      .tab-badge {
+        background: var(--accent-primary);
+        color: white;
+        font-size: 10px;
+        padding: 1px 6px;
+        border-radius: 10px;
+        margin-left: 6px;
+      }
+
+      /* Tab content */
+      .tab-content {
+        display: none;
+        height: calc(580px - 92px);
+        overflow: hidden;
+      }
+
+      .tab-content.active {
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Search tab */
+      .search-section {
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border-subtle);
+        background: var(--bg-surface);
+      }
+
+      .search-input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+
+      .search-input {
+        width: 100%;
+        padding: 8px 12px 8px 36px;
+        background: var(--bg-base);
+        border: 1px solid var(--border-subtle);
+        border-radius: 8px;
+        color: var(--text-primary);
+        font-size: 13px;
+      }
+
+      .search-input:focus {
+        outline: none;
+        border-color: var(--accent-primary);
+      }
+
+      .search-input::placeholder {
+        color: var(--text-muted);
+      }
+
+      .search-icon {
+        position: absolute;
+        left: 12px;
+        color: var(--text-muted);
+      }
+
+      .search-shortcut {
+        position: absolute;
+        right: 10px;
+        font-size: 10px;
+        color: var(--text-muted);
+        background: var(--bg-elevated);
+        padding: 2px 6px;
+        border-radius: 4px;
+        border: 1px solid var(--border-subtle);
+      }
+
+      /* Provider pills */
+      .provider-pills {
+        display: flex;
+        gap: 6px;
+        margin-top: 10px;
+        flex-wrap: wrap;
+      }
+
+      .provider-pill {
+        padding: 4px 10px;
+        font-size: 11px;
+        border-radius: 12px;
+        background: var(--bg-elevated);
+        border: 1px solid var(--border-subtle);
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+
+      .provider-pill:hover {
+        border-color: var(--border-default);
+        color: var(--text-primary);
+      }
+
+      .provider-pill.active {
+        background: var(--accent-primary);
+        border-color: var(--accent-primary);
+        color: white;
+      }
+
+      /* Chat list */
+      .chat-list-container {
+        flex: 1;
+        overflow-y: auto;
+        background: var(--bg-base);
+      }
+
+      .chat-item {
+        padding: 10px 16px;
+        border-bottom: 1px solid var(--border-subtle);
+        cursor: pointer;
+        transition: background 0.1s;
+      }
+
+      .chat-item:hover {
+        background: var(--bg-surface);
+      }
+
+      .chat-item.focused {
+        background: var(--bg-surface);
+        outline: 1px solid var(--accent-primary);
+        outline-offset: -1px;
+      }
+
+      .chat-item.expanded {
+        background: var(--bg-surface);
+      }
+
+      .chat-item-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .chat-provider-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 12px;
+      }
+
+      .chat-provider-icon.chatgpt { background: rgba(16, 163, 127, 0.15); color: var(--provider-chatgpt); }
+      .chat-provider-icon.claude { background: rgba(212, 165, 116, 0.15); color: var(--provider-claude); }
+      .chat-provider-icon.gemini { background: rgba(66, 133, 244, 0.15); color: var(--provider-gemini); }
+      .chat-provider-icon.grok { background: rgba(29, 155, 240, 0.15); color: var(--provider-grok); }
+      .chat-provider-icon.copilot { background: rgba(155, 93, 229, 0.15); color: var(--provider-copilot); }
+
+      .chat-info {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .chat-title {
+        font-weight: 500;
+        font-size: 13px;
+        color: var(--text-primary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .chat-meta {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 2px;
+        font-size: 11px;
+        color: var(--text-muted);
+      }
+
+      .chat-time {
+        font-size: 11px;
+        color: var(--text-muted);
+        flex-shrink: 0;
+      }
+
+      /* Expanded preview */
+      .chat-preview {
+        display: none;
+        margin-top: 10px;
+        padding: 10px 12px;
+        background: var(--bg-base);
+        border-radius: 6px;
+        border: 1px solid var(--border-subtle);
+      }
+
+      .chat-item.expanded .chat-preview {
+        display: block;
+      }
+
+      .preview-message {
+        padding: 6px 0;
+        border-bottom: 1px solid var(--border-subtle);
+      }
+
+      .preview-message:last-child {
+        border-bottom: none;
+      }
+
+      .preview-role {
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+      }
+
+      .preview-role.user { color: var(--accent-primary); }
+      .preview-role.assistant { color: var(--text-secondary); }
+
+      .preview-text {
+        font-size: 12px;
+        color: var(--text-secondary);
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .preview-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid var(--border-subtle);
+      }
+
+      .preview-btn {
+        padding: 6px 12px;
+        font-size: 11px;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .preview-btn.primary {
+        background: var(--accent-primary);
+        color: white;
+      }
+
+      .preview-btn.primary:hover {
+        background: var(--accent-hover);
+      }
+
+      .preview-btn.secondary {
+        background: var(--bg-elevated);
+        color: var(--text-secondary);
+        border: 1px solid var(--border-subtle);
+      }
+
+      .preview-btn.secondary:hover {
+        background: var(--bg-hover);
+        color: var(--text-primary);
+      }
+
+      /* Peek modal */
+      .peek-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 1000;
+      }
+
+      .peek-modal.visible {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .peek-content {
+        background: var(--bg-surface);
+        border-radius: 12px;
+        width: 95%;
+        max-width: 460px;
+        max-height: 90%;
+        display: flex;
+        flex-direction: column;
+        border: 1px solid var(--border-subtle);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      }
+
+      .peek-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--border-subtle);
+      }
+
+      .peek-title {
+        font-weight: 600;
+        font-size: 14px;
+      }
+
+      .peek-close {
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        padding: 4px;
+      }
+
+      .peek-close:hover {
+        color: var(--text-primary);
+      }
+
+      .peek-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px;
+      }
+
+      .peek-message {
+        margin-bottom: 16px;
+      }
+
+      .peek-message:last-child {
+        margin-bottom: 0;
+      }
+
+      .peek-message-role {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+      }
+
+      .peek-message-role.user { color: var(--accent-primary); }
+      .peek-message-role.assistant { color: var(--text-secondary); }
+
+      .peek-message-text {
+        font-size: 13px;
+        color: var(--text-primary);
+        line-height: 1.5;
+        white-space: pre-wrap;
+      }
+
+      .peek-footer {
+        display: flex;
+        gap: 8px;
+        padding: 12px 16px;
+        border-top: 1px solid var(--border-subtle);
+      }
+
+      .peek-footer .preview-btn {
+        flex: 1;
+        justify-content: center;
+      }
+
+      /* Empty state */
+      .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: var(--text-muted);
+      }
+
+      .empty-state-icon {
+        margin-bottom: 12px;
+        color: var(--text-muted);
+      }
+
+      .empty-state-title {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--text-secondary);
+        margin-bottom: 4px;
+      }
+
+      .empty-state-subtitle {
+        font-size: 12px;
+      }
+
+      /* Sync tab */
+      .sync-content {
+        padding: 12px 16px;
+        overflow-y: auto;
+      }
+
+      .sync-panel {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-subtle);
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 12px;
+      }
+
+      .sync-panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+      }
+
+      .sync-panel-title {
+        font-weight: 600;
+        font-size: 12px;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .sync-status-badge {
+        font-size: 10px;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-weight: 600;
+      }
+
+      .sync-status-badge.idle { background: var(--bg-elevated); color: var(--text-muted); }
+      .sync-status-badge.running { background: rgba(16, 163, 127, 0.15); color: #10a37f; }
+      .sync-status-badge.paused { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+
+      .sync-stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+
+      .sync-stat {
+        text-align: center;
+        padding: 8px 4px;
+        background: var(--bg-base);
+        border-radius: 6px;
+      }
+
+      .sync-stat-value {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      .sync-stat-value.pending { color: #f59e0b; }
+      .sync-stat-value.syncing { color: var(--accent-primary); }
+      .sync-stat-value.completed { color: #10a37f; }
+      .sync-stat-value.failed { color: #ef4444; }
+
+      .sync-stat-label {
+        font-size: 9px;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        margin-top: 2px;
+      }
+
+      .sync-controls {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .sync-btn {
+        padding: 6px 12px;
+        font-size: 11px;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        font-weight: 500;
+      }
+
+      .sync-btn.primary {
+        background: var(--accent-primary);
+        color: white;
+      }
+
+      .sync-btn.primary:hover {
+        background: var(--accent-hover);
+      }
+
+      .sync-btn.secondary {
+        background: var(--bg-elevated);
+        color: var(--text-secondary);
+        border: 1px solid var(--border-subtle);
+      }
+
+      .sync-btn.secondary:hover {
+        background: var(--bg-hover);
+        color: var(--text-primary);
+      }
+
+      .sync-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .progress-bar {
+        height: 4px;
+        background: var(--bg-base);
+        border-radius: 2px;
+        margin-top: 12px;
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: var(--accent-primary);
+        transition: width 0.3s;
+      }
+
+      /* Log panel */
+      .log-panel {
+        background: var(--bg-base);
+        border: 1px solid var(--border-subtle);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .log-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 12px;
+        background: var(--bg-elevated);
+        cursor: pointer;
+      }
+
+      .log-header-title {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--text-secondary);
+      }
+
+      .log-toggle {
+        font-size: 10px;
+        color: var(--text-muted);
+      }
+
+      .log-content {
+        max-height: 140px;
+        overflow-y: auto;
+        font-family: 'SF Mono', Monaco, monospace;
+        font-size: 10px;
+        padding: 8px;
+      }
+
+      .log-content.collapsed {
+        display: none;
+      }
+
+      .log-entry {
+        padding: 3px 0;
+        border-bottom: 1px solid var(--border-subtle);
+        line-height: 1.4;
+      }
+
+      .log-entry:last-child {
+        border-bottom: none;
+      }
+
+      .log-time {
+        color: var(--text-muted);
+        margin-right: 8px;
+      }
+
+      .log-tag {
+        display: inline-block;
+        padding: 1px 4px;
+        border-radius: 3px;
+        font-size: 9px;
+        font-weight: 600;
+        margin-right: 6px;
+        text-transform: uppercase;
+      }
+
+      .log-tag.sync { background: var(--accent-primary); color: white; }
+      .log-tag.queue { background: #f59e0b; color: white; }
+      .log-tag.error { background: #ef4444; color: white; }
+      .log-tag.success { background: #10a37f; color: white; }
+      .log-tag.info { background: var(--text-muted); color: white; }
+
+      .log-msg { color: var(--text-secondary); }
+      .log-msg.error { color: #f87171; }
+      .log-msg.success { color: #4ade80; }
+
+      .log-empty {
+        color: var(--text-muted);
+        text-align: center;
+        padding: 16px;
+        font-style: italic;
+      }
+
+      /* Keyboard shortcuts footer */
+      .shortcuts-footer {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        padding: 8px 16px;
+        background: var(--bg-surface);
+        border-top: 1px solid var(--border-subtle);
+        font-size: 10px;
+        color: var(--text-muted);
+      }
+
+      .shortcut {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .shortcut kbd {
+        background: var(--bg-elevated);
+        border: 1px solid var(--border-subtle);
+        border-radius: 3px;
+        padding: 1px 4px;
+        font-family: inherit;
+        font-size: 9px;
+      }
+
+      /* Dropdown */
+      .dropdown {
+        position: relative;
+      }
+
+      .dropdown-menu {
+        display: none;
+        position: absolute;
+        right: 0;
+        top: 100%;
+        margin-top: 4px;
+        background: var(--bg-elevated);
+        border: 1px solid var(--border-subtle);
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        min-width: 160px;
+        z-index: 100;
+        overflow: hidden;
+      }
+
+      .dropdown-menu.show {
+        display: block;
+      }
+
+      .dropdown-item {
+        display: block;
+        width: 100%;
+        padding: 8px 12px;
+        text-align: left;
+        font-size: 12px;
+        border: none;
+        background: none;
+        cursor: pointer;
+        color: var(--text-secondary);
+      }
+
+      .dropdown-item:hover {
+        background: var(--bg-hover);
+        color: var(--text-primary);
+      }
+
+      .dropdown-item.danger {
+        color: #ef4444;
+      }
+
+      .dropdown-item.danger:hover {
+        background: rgba(239, 68, 68, 0.1);
+      }
+
+      .dropdown-divider {
+        height: 1px;
+        background: var(--border-subtle);
+        margin: 4px 0;
+      }
+
+      /* Attachment badges */
+      .chat-attachments {
+        display: inline-flex;
+        gap: 4px;
+        margin-left: 4px;
+      }
+
+      .attachment-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-muted);
+        opacity: 0.8;
+      }
+
+      .attachment-badge svg {
+        width: 12px;
+        height: 12px;
+      }
+
+      /* Markdown styles */
+      .md-code-block {
+        background: var(--bg-base);
+        border: 1px solid var(--border-subtle);
+        border-radius: 4px;
+        padding: 8px;
+        margin: 6px 0;
+        font-family: 'SF Mono', Monaco, monospace;
+        font-size: 11px;
+        overflow-x: auto;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      .md-inline-code {
+        background: var(--bg-elevated);
+        border-radius: 3px;
+        padding: 1px 4px;
+        font-family: 'SF Mono', Monaco, monospace;
+        font-size: 11px;
+      }
+
+      .md-link {
+        color: var(--accent-primary);
+      }
+
+      .md-h1, .md-h2, .md-h3 {
+        display: block;
+        color: var(--text-primary);
+        margin: 4px 0;
+      }
+
+      .md-h1 { font-size: 14px; }
+      .md-h2 { font-size: 13px; }
+      .md-h3 { font-size: 12px; }
+
+      .preview-text code,
+      .peek-message-text code {
+        background: var(--bg-elevated);
+        border-radius: 3px;
+        padding: 1px 4px;
+        font-family: 'SF Mono', Monaco, monospace;
+        font-size: 11px;
+      }
+
+      .preview-text pre,
+      .peek-message-text pre {
+        background: var(--bg-base);
+        border: 1px solid var(--border-subtle);
+        border-radius: 4px;
+        padding: 8px;
+        margin: 6px 0;
+        font-size: 11px;
+        overflow-x: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        Liberator
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" id="open-search" title="Open full search (Cmd+K)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+            <polyline points="15 3 21 3 21 9"/>
+            <line x1="10" y1="14" x2="21" y2="3"/>
+          </svg>
+        </button>
+        <div class="dropdown">
+          <button class="icon-btn" id="settings-btn" title="Settings">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+          </button>
+          <div class="dropdown-menu" id="settings-menu">
+            <button class="dropdown-item" id="open-settings">Settings</button>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item" id="export-logs">Export Logs</button>
+            <button class="dropdown-item" id="dump-db">Export Database</button>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item" id="cleanup-data">Cleanup Data</button>
+            <button class="dropdown-item" id="queue-clear">Clear Queue</button>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item" id="save-html">Save Page HTML</button>
+            <button class="dropdown-item danger" id="reload">Reload Extension</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" data-tab="search">Search</button>
+      <button class="tab" data-tab="sync">Sync <span class="tab-badge" id="queue-badge" style="display: none;">0</span></button>
+    </div>
+
+    <!-- Search Tab -->
+    <div class="tab-content active" id="tab-search">
+      <div class="search-section">
+        <div class="search-input-wrapper">
+          <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="m21 21-4.3-4.3"/>
+          </svg>
+          <input type="text" class="search-input" id="search-input" placeholder="Search conversations..." />
+          <span class="search-shortcut">/</span>
+        </div>
+        <div class="provider-pills">
+          <button class="provider-pill active" data-provider="">All</button>
+          <button class="provider-pill" data-provider="chatgpt">ChatGPT</button>
+          <button class="provider-pill" data-provider="claude">Claude</button>
+          <button class="provider-pill" data-provider="gemini">Gemini</button>
+          <button class="provider-pill" data-provider="grok">Grok</button>
+          <button class="provider-pill" data-provider="copilot">Copilot</button>
+        </div>
+      </div>
+      <div class="chat-list-container" id="chat-list"></div>
+    </div>
+
+    <!-- Sync Tab -->
+    <div class="tab-content" id="tab-sync">
+      <div class="sync-content">
+        <!-- Queue panel -->
+        <div class="sync-panel">
+          <div class="sync-panel-header">
+            <span class="sync-panel-title">Background Sync Queue</span>
+            <span class="sync-status-badge idle" id="queue-status">Idle</span>
+          </div>
+          <div class="sync-stats">
+            <div class="sync-stat">
+              <div class="sync-stat-value pending" id="queue-pending">0</div>
+              <div class="sync-stat-label">Pending</div>
+            </div>
+            <div class="sync-stat">
+              <div class="sync-stat-value syncing" id="queue-syncing">0</div>
+              <div class="sync-stat-label">Syncing</div>
+            </div>
+            <div class="sync-stat">
+              <div class="sync-stat-value completed" id="queue-completed">0</div>
+              <div class="sync-stat-label">Done</div>
+            </div>
+            <div class="sync-stat">
+              <div class="sync-stat-value failed" id="queue-failed">0</div>
+              <div class="sync-stat-label">Failed</div>
+            </div>
+          </div>
+          <div class="sync-controls">
+            <button class="sync-btn secondary" id="queue-discover">Discover Chats</button>
+            <button class="sync-btn primary" id="queue-start">Start</button>
+            <button class="sync-btn secondary" id="queue-pause" style="display: none;">Pause</button>
+            <button class="sync-btn primary" id="queue-resume" style="display: none;">Resume</button>
+            <button class="sync-btn secondary" id="queue-stop" style="display: none;">Stop</button>
+            <button class="sync-btn secondary" id="queue-retry">Retry Failed</button>
+          </div>
+          <div class="progress-bar" id="queue-progress-bar" style="display: none;">
+            <div class="progress-fill" id="queue-progress-fill" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <!-- Quick sync -->
+        <div class="sync-panel">
+          <div class="sync-panel-header">
+            <span class="sync-panel-title">Quick Actions</span>
+          </div>
+          <div class="sync-controls">
+            <button class="sync-btn primary" id="sync-tab">Sync Current Tab</button>
+          </div>
+        </div>
+
+        <!-- Log panel -->
+        <div class="log-panel">
+          <div class="log-header" id="log-toggle">
+            <span class="log-header-title">Activity Log</span>
+            <span class="log-toggle" id="log-toggle-icon">[-]</span>
+          </div>
+          <div class="log-content" id="log-content">
+            <div class="log-empty" id="log-empty">No activity yet</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Peek Modal -->
+    <div class="peek-modal" id="peek-modal">
+      <div class="peek-content">
+        <div class="peek-header">
+          <span class="peek-title" id="peek-title">Chat Title</span>
+          <button class="peek-close" id="peek-close">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+        <div class="peek-messages" id="peek-messages"></div>
+        <div class="peek-footer">
+          <button class="preview-btn secondary" id="peek-copy">Copy Link</button>
+          <button class="preview-btn secondary" id="peek-pin">Pin to Sidebar</button>
+          <button class="preview-btn primary" id="peek-open">Open Chat</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Keyboard shortcuts footer -->
+    <div class="shortcuts-footer">
+      <span class="shortcut"><kbd>/</kbd> Search</span>
+      <span class="shortcut"><kbd>J</kbd><kbd>K</kbd> Navigate</span>
+      <span class="shortcut"><kbd>Enter</kbd> Open</span>
+      <span class="shortcut"><kbd>P</kbd> Peek</span>
+    </div>
+
+    <script type="module" src="./popup.js"></script>
+  </body>
+</html>

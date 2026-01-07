@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mock Claude Chat</title>
+</head>
+<body>
+  <!-- Sidebar with chat list -->
+  <nav>
+    <div class="sidebar">
+      <a href="/chat/chat-uuid-001" data-testid="conversation-item">Building a Chrome extension</a>
+      <a href="/chat/chat-uuid-002" data-testid="conversation-item">Python data analysis</a>
+      <a href="/chat/chat-uuid-003" data-testid="conversation-item">React component design</a>
+      <a href="/chat/chat-uuid-004" data-testid="conversation-item">API integration help</a>
+      <a href="/chat/chat-uuid-005" data-testid="conversation-item">Database optimization</a>
+    </div>
+  </nav>
+
+  <!-- Main content -->
+  <main>
+    <h1 data-testid="conversation-title">Building a Chrome extension</h1>
+
+    <div class="conversation">
+      <!-- User message -->
+      <div class="message" data-testid="user-message">
+        <div class="author">Human</div>
+        <div class="content">How do I create a Chrome extension that syncs data across tabs?</div>
+      </div>
+
+      <!-- Assistant message -->
+      <div class="message" data-testid="assistant-message">
+        <div class="author">Claude</div>
+        <div class="content">
+          <p>I'll help you create a Chrome extension for syncing data across tabs. Here's the approach:</p>
+          <ol>
+            <li>Use chrome.storage.local for persistent storage</li>
+            <li>Set up message passing between content scripts and background</li>
+            <li>Use chrome.tabs API to communicate across tabs</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- User follow-up -->
+      <div class="message" data-testid="user-message">
+        <div class="author">Human</div>
+        <div class="content">Can you show me a code example?</div>
+      </div>
+
+      <!-- Assistant with code -->
+      <div class="message" data-testid="assistant-message">
+        <div class="author">Claude</div>
+        <div class="content">
+          <p>Here's a basic example:</p>
+          <pre><code class="language-javascript">
+// background.js
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.type === 'SYNC_DATA') {
+    chrome.storage.local.set({ data: request.data });
+    sendResponse({ success: true });
+  }
+  return true;
+});
+          </code></pre>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Artifacts section -->
+  <aside class="artifacts">
+    <div class="artifact" data-testid="artifact" data-title="Sync Helper Code">
+      <pre><code>function syncData() { return true; }</code></pre>
+    </div>
+  </aside>
+
+  <script>
+    // Simulate Claude's URL structure
+    if (!window.location.pathname.includes('/chat/')) {
+      history.replaceState({}, '', '/chat/chat-uuid-001');
+    }
+  </script>
+</body>
+</html>

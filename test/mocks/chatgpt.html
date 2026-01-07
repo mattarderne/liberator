@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mock ChatGPT</title>
+</head>
+<body>
+  <!-- Sidebar with conversation list -->
+  <nav>
+    <div data-testid="conversation-list">
+      <a href="/c/conv-uuid-001" data-testid="conversation-item">Machine learning basics</a>
+      <a href="/c/conv-uuid-002" data-testid="conversation-item">Code review assistance</a>
+      <a href="/c/conv-uuid-003" data-testid="conversation-item">Writing a blog post</a>
+      <a href="/c/conv-uuid-004" data-testid="conversation-item">Debug React app</a>
+      <a href="/c/conv-uuid-005" data-testid="conversation-item">SQL query optimization</a>
+      <a href="/c/conv-uuid-006" data-testid="conversation-item">API design patterns</a>
+    </div>
+  </nav>
+
+  <!-- Main chat area -->
+  <main role="main">
+    <h1 data-testid="conversation-title">Machine learning basics</h1>
+
+    <div class="conversation">
+      <!-- User turn -->
+      <div class="message" data-message-author-role="user">
+        <div class="message-content">Explain supervised learning in simple terms</div>
+      </div>
+
+      <!-- Assistant turn -->
+      <div class="message" data-message-author-role="assistant">
+        <div class="message-content">
+          <p>Supervised learning is like learning with a teacher! Here's how it works:</p>
+          <ul>
+            <li><strong>Training data</strong>: You give the model examples with correct answers</li>
+            <li><strong>Learning</strong>: The model finds patterns in the data</li>
+            <li><strong>Prediction</strong>: It uses those patterns to answer new questions</li>
+          </ul>
+          <p>Think of it like studying flashcards - you see the question and answer together, then later you can answer similar questions on your own.</p>
+        </div>
+      </div>
+
+      <!-- User follow-up -->
+      <div class="message" data-message-author-role="user">
+        <div class="message-content">Can you show me a simple Python example?</div>
+      </div>
+
+      <!-- Assistant with code -->
+      <div class="message" data-message-author-role="assistant">
+        <div class="message-content">
+          <p>Here's a basic supervised learning example using scikit-learn:</p>
+          <pre><code class="language-python">
+from sklearn.linear_model import LinearRegression
+import numpy as np
+
+# Training data (X = features, y = labels)
+X = np.array([[1], [2], [3], [4], [5]])
+y = np.array([2, 4, 6, 8, 10])
+
+# Create and train the model
+model = LinearRegression()
+model.fit(X, y)
+
+# Make a prediction
+prediction = model.predict([[6]])
+print(f"Prediction for 6: {prediction[0]}")  # Output: 12
+          </code></pre>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Simulate ChatGPT's URL structure
+    if (!window.location.pathname.includes('/c/')) {
+      history.replaceState({}, '', '/c/conv-uuid-001');
+    }
+  </script>
+</body>
+</html>

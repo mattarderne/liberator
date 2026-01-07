@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Liberator</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-base: #1e1f22;
+      --bg-surface: #2b2d31;
+      --bg-hover: #35373c;
+      --bg-active: #3f4147;
+      --text-primary: #f2f3f5;
+      --text-secondary: #b5bac1;
+      --text-muted: #80848e;
+      --border: #3f4147;
+      --accent: #5865f2;
+      --accent-hover: #4752c4;
+      --scrollbar-thumb: #4a4a4a;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-base);
+      color: var(--text-primary);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #5a5a5a; }
+
+    /* Header with Search */
+    .header {
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+      letter-spacing: -0.5px;
+    }
+
+    .search-container {
+      flex: 1;
+      max-width: 600px;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 10px 16px 10px 40px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      color: var(--text-primary);
+      font-size: 14px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(88, 101, 242, 0.2);
+    }
+
+    .search-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .search-shortcut {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 11px;
+      background: var(--bg-hover);
+      padding: 2px 6px;
+      border-radius: 4px;
+      pointer-events: none;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .header-btn {
+      padding: 8px 12px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .header-btn:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    /* Main Content - Split Layout */
+    .main-wrapper {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+      background: var(--bg-base);
+      color: var(--text-primary);
+    }
+
+    .chat-list-pane {
+      width: 400px;
+      min-width: 320px;
+      max-width: 500px;
+      overflow-y: auto;
+      border-right: 1px solid var(--border);
+      padding: 12px;
+      background: var(--bg-base);
+      color: var(--text-primary);
+    }
+
+    .preview-pane {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-base);
+      color: var(--text-primary);
+    }
+
+    .preview-empty {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      gap: 12px;
+    }
+
+    .preview-empty svg {
+      opacity: 0.3;
+    }
+
+    /* Preview Header */
+    .preview-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: var(--bg-surface);
+      color: var(--text-primary);
+    }
+
+    .preview-header-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .preview-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .preview-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Action Panel */
+    .action-panel {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .action-btn {
+      padding: 8px 12px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .action-btn:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .action-btn.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    .action-btn.primary:hover {
+      background: var(--accent-hover);
+    }
+
+    /* Preview Messages */
+    .preview-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px;
+      background: var(--bg-base);
+      color: var(--text-primary);
+    }
+
+    .message {
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+      max-width: 100%;
+    }
+
+    .message:last-child {
+      border-bottom: none;
+    }
+
+    .message:first-child {
+      padding-top: 0;
+    }
+
+    .message-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .message-role {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .message-role.user { color: var(--accent); }
+    .message-role.assistant { color: #10a37f; }
+
+    .message-content {
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text-primary);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .message-content.truncated {
+      max-height: 200px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .message-content.truncated::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: linear-gradient(transparent, var(--bg-base));
+    }
+
+    .preview-loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      color: var(--text-muted);
+      background: var(--bg-base);
+    }
+
+    /* Time Groups */
+    .time-group {
+      margin-bottom: 24px;
+    }
+
+    .time-group-header {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 8px 12px;
+      position: sticky;
+      top: 0;
+      background: var(--bg-base);
+      z-index: 1;
+      margin: 0;
+    }
+
+    /* Chat List */
+    .chat-list {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .chat-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.1s;
+      position: relative;
+    }
+
+    .chat-item:hover {
+      background: var(--bg-hover);
+    }
+
+    .chat-item.selected {
+      background: var(--bg-active);
+    }
+
+    .chat-item.focused {
+      background: var(--bg-hover);
+      outline: 2px solid var(--accent);
+      outline-offset: -2px;
+    }
+
+    .chat-provider {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .chat-provider.chatgpt { background: #10a37f20; color: #10a37f; }
+    .chat-provider.claude { background: #d97a5720; color: #d97a57; }
+    .chat-provider.gemini { background: #4285f420; color: #4285f4; }
+    .chat-provider.grok { background: #1d9bf020; color: #1d9bf0; }
+    .chat-provider.copilot { background: #9b59b620; color: #9b59b6; }
+
+    .chat-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .chat-title {
+      font-size: 14px;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 2px;
+    }
+
+    .chat-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .chat-tags {
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .chat-tag {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 10px;
+      background: var(--bg-hover);
+      color: var(--text-secondary);
+    }
+
+    .chat-time {
+      font-size: 11px;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    /* Empty State */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 60%;
+      color: var(--text-muted);
+      text-align: center;
+      background: var(--bg-base);
+    }
+
+    .empty-state-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .empty-state-title {
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .empty-state-subtitle {
+      font-size: 14px;
+    }
+
+    /* Footer with Shortcuts */
+    .footer {
+      padding: 12px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .shortcut {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    .shortcut kbd {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-family: inherit;
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    /* Loading */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      color: var(--text-muted);
+    }
+
+    /* Stats bar */
+    .stats-bar {
+      padding: 8px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 12px;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .stat-value {
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    /* Provider filter pills */
+    .filter-pills {
+      display: flex;
+      gap: 6px;
+      margin-left: auto;
+    }
+
+    .filter-pill {
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      cursor: pointer;
+      background: var(--bg-surface);
+      color: var(--text-muted);
+      border: 1px solid transparent;
+      transition: all 0.15s;
+    }
+
+    .filter-pill:hover {
+      background: var(--bg-hover);
+      color: var(--text-secondary);
+    }
+
+    .filter-pill.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    /* Attachment badges */
+    .chat-attachments {
+      display: inline-flex;
+      gap: 4px;
+      margin-left: 4px;
+    }
+
+    .attachment-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      opacity: 0.8;
+    }
+
+    .attachment-badge svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    /* Markdown styles */
+    .md-code-block {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px;
+      margin: 8px 0;
+      font-family: 'SF Mono', Monaco, 'Consolas', monospace;
+      font-size: 13px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .md-inline-code {
+      background: var(--bg-surface);
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-family: 'SF Mono', Monaco, 'Consolas', monospace;
+      font-size: 13px;
+    }
+
+    .md-link {
+      color: var(--accent);
+    }
+
+    .md-h1, .md-h2, .md-h3 {
+      display: block;
+      color: var(--text-primary);
+      margin: 8px 0 4px 0;
+    }
+
+    .md-h1 { font-size: 18px; }
+    .md-h2 { font-size: 16px; }
+    .md-h3 { font-size: 15px; }
+
+    .message-content code {
+      background: var(--bg-surface);
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-family: 'SF Mono', Monaco, 'Consolas', monospace;
+      font-size: 13px;
+    }
+
+    .message-content pre {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px;
+      margin: 8px 0;
+      font-size: 13px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="logo">Liberator</div>
+    <div class="search-container">
+      <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <path d="m21 21-4.3-4.3"></path>
+      </svg>
+      <input type="text" id="search-input" class="search-input" placeholder="Search conversations..." autofocus>
+      <span class="search-shortcut">/</span>
+    </div>
+    <div class="header-actions">
+      <button class="header-btn" id="advanced-btn" title="Advanced View">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+        </svg>
+        Advanced
+      </button>
+      <button class="header-btn" id="settings-btn" title="Settings">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="stats-bar">
+    <div class="stat-item">
+      <span class="stat-value" id="total-count">0</span>
+      <span>conversations</span>
+    </div>
+    <div class="filter-pills">
+      <button class="filter-pill active" data-provider="">All</button>
+      <button class="filter-pill" data-provider="chatgpt">ChatGPT</button>
+      <button class="filter-pill" data-provider="claude">Claude</button>
+      <button class="filter-pill" data-provider="gemini">Gemini</button>
+      <button class="filter-pill" data-provider="grok">Grok</button>
+      <button class="filter-pill" data-provider="copilot">Copilot</button>
+    </div>
+  </div>
+
+  <div class="main-wrapper">
+    <div class="chat-list-pane" id="chat-list-pane">
+      <div class="loading" id="loading">Loading conversations...</div>
+    </div>
+    <div class="preview-pane" id="preview-pane">
+      <div class="preview-empty">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+        <span>Select a conversation to preview</span>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="shortcut"><kbd>/</kbd> <span>Search</span></div>
+    <div class="shortcut"><kbd>↑</kbd><kbd>↓</kbd> <span>Navigate</span></div>
+    <div class="shortcut"><kbd>Enter</kbd> <span>Open</span></div>
+    <div class="shortcut"><kbd>Tab</kbd> <span>Advanced View</span></div>
+    <div class="shortcut"><kbd>?</kbd> <span>Shortcuts</span></div>
+  </footer>
+
+  <script src="search.js"></script>
+</body>
+</html>

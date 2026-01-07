@@ -1,0 +1,28 @@
+{
+  "name": "thread-hub-extension-tests",
+  "version": "1.0.0",
+  "description": "Chrome extension testing with stealth automation (rebrowser-playwright)",
+  "scripts": {
+    "dev": "node scripts/watch.js",
+    "test": "ts-node tests/main.test.ts",
+    "test:stealth": "ts-node tests/stealth.test.ts",
+    "test:extension": "ts-node tests/extension-only.test.ts",
+    "test:chatgpt": "ts-node tests/chatgpt.test.ts",
+    "login": "ts-node tests/simple-login.ts",
+    "login:chatgpt": "TARGET_URL=https://chatgpt.com PROFILE_PATH=.test-profile-chatgpt ts-node tests/simple-login.ts",
+    "install-chrome": "npx @puppeteer/browsers install chrome@stable"
+  },
+  "dependencies": {
+    "dotenv": "^17.0.0",
+    "playwright": "^1.57.0",
+    "rebrowser-playwright": "^1.52.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "chokidar": "^5.0.0",
+    "jsdom": "^27.4.0",
+    "sharp": "^0.34.0"
+  }
+}

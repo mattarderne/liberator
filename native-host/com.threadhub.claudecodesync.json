@@ -1,0 +1,9 @@
+{
+  "name": "com.threadhub.claudecodesync",
+  "description": "Claude Code session sync for Thread Hub",
+  "path": "/path/to/liberator/native-host/claude-code-sync.js",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://YOUR_EXTENSION_ID/"
+  ]
+}

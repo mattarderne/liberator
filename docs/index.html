@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Liberator | Set your AI chats free</title>
+  <meta name="description" content="Your conversations are trapped. Liberator unifies them all in one searchable, local database.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            background: '#F9F8F6',
+            foreground: '#1A1A1A',
+            muted: {
+              DEFAULT: '#EBE5DE',
+              foreground: '#6C6863',
+            },
+            accent: '#D4AF37',
+          },
+          fontFamily: {
+            serif: ['Playfair Display', 'serif'],
+            sans: ['Inter', 'sans-serif'],
+          },
+          animation: {
+            'blink': 'blink 1s step-end infinite',
+          },
+          keyframes: {
+            blink: {
+              '50%': { opacity: '0' },
+            },
+            fadeIn: {
+              '0%': { opacity: '0', transform: 'translateY(8px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #F9F8F6;
+      color: #1A1A1A;
+      overflow-x: hidden;
+    }
+
+    ::selection {
+      background-color: #D4AF37;
+      color: #F9F8F6;
+    }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: #F9F8F6; }
+    ::-webkit-scrollbar-thumb { background: #1A1A1A; }
+    ::-webkit-scrollbar-thumb:hover { background: #D4AF37; }
+
+    /* Paper noise texture */
+    .paper-texture::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      opacity: 0.02;
+      pointer-events: none;
+      z-index: 50;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    /* Vertical text */
+    .vertical-text {
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+    }
+
+    /* Drop cap */
+    .drop-cap::first-letter {
+      float: left;
+      font-family: 'Playfair Display', serif;
+      font-size: 4.5rem;
+      line-height: 0.8;
+      margin-right: 0.75rem;
+      margin-top: 0.1rem;
+      color: #1A1A1A;
+    }
+
+    /* Button gold slide animation */
+    .btn-primary {
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-primary .gold-overlay {
+      position: absolute;
+      inset: 0;
+      background-color: #D4AF37;
+      transform: translateX(-100%);
+      transition: transform 500ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    .btn-primary:hover .gold-overlay {
+      transform: translateX(0);
+    }
+    .btn-primary .btn-content {
+      position: relative;
+      z-index: 10;
+    }
+
+    /* Smooth transitions */
+    .transition-luxury {
+      transition: all 700ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    /* Image grayscale transition */
+    .image-luxury {
+      filter: grayscale(1);
+      transition: filter 1500ms cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 1500ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    .group:hover .image-luxury {
+      filter: grayscale(0);
+    }
+  </style>
+</head>
+<body class="paper-texture">
+
+  <!-- Visible Grid Lines -->
+  <div class="hidden lg:block fixed inset-0 pointer-events-none z-40">
+    <div class="max-w-[1600px] mx-auto h-full relative">
+      <div class="absolute left-[8.33%] top-0 bottom-0 w-px bg-[#1A1A1A]/10"></div>
+      <div class="absolute left-[33.33%] top-0 bottom-0 w-px bg-[#1A1A1A]/10"></div>
+      <div class="absolute left-[66.66%] top-0 bottom-0 w-px bg-[#1A1A1A]/10"></div>
+      <div class="absolute left-[91.66%] top-0 bottom-0 w-px bg-[#1A1A1A]/10"></div>
+    </div>
+  </div>
+
+  <!-- Navbar -->
+  <nav class="fixed top-0 left-0 right-0 z-50 border-b border-[#1A1A1A]/10 bg-background/95 backdrop-blur-sm">
+    <div class="max-w-[1600px] mx-auto px-8 md:px-16 h-24 flex items-center justify-between">
+      <div class="flex items-center gap-4 cursor-pointer group">
+        <span class="font-serif text-2xl tracking-tight text-foreground transition-luxury group-hover:text-accent">Liberator</span>
+      </div>
+
+      <div class="hidden md:flex items-center gap-12">
+        <a href="#features" class="text-xs uppercase tracking-[0.25em] text-muted-foreground hover:text-accent transition-all duration-500">Features</a>
+        <a href="#process" class="text-xs uppercase tracking-[0.25em] text-muted-foreground hover:text-accent transition-all duration-500">Process</a>
+        <a href="#roadmap" class="text-xs uppercase tracking-[0.25em] text-muted-foreground hover:text-accent transition-all duration-500">Roadmap</a>
+      </div>
+
+      <div class="flex items-center gap-6">
+        <a href="https://github.com/mattarderne/liberator" target="_blank" class="hidden md:block text-xs uppercase tracking-[0.2em] text-foreground hover:text-accent transition-all duration-500">GitHub</a>
+        <button class="btn-primary bg-foreground text-background px-8 py-4 text-xs uppercase tracking-[0.2em] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.25)] transition-all duration-500">
+          <span class="gold-overlay"></span>
+          <span class="btn-content">Get Extension</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="relative pt-48 pb-32 md:pt-56 md:pb-48 px-8 md:px-16 min-h-screen flex items-center">
+    <div class="max-w-[1600px] mx-auto w-full">
+      <div class="grid grid-cols-12 gap-8">
+        <!-- Vertical label -->
+        <div class="hidden lg:flex col-span-1 items-end pb-8">
+          <span class="vertical-text text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Editorial / Vol. 01</span>
+        </div>
+
+        <!-- Main content -->
+        <div class="col-span-12 lg:col-span-7 lg:col-start-2 flex flex-col justify-end">
+          <!-- Decorative line and label -->
+          <div class="flex items-center gap-4 mb-12">
+            <div class="h-px w-8 md:w-12 bg-foreground"></div>
+            <span class="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Public Beta v1.1.0</span>
+          </div>
+
+          <h1 class="font-serif text-5xl md:text-7xl lg:text-9xl leading-[0.9] tracking-tight mb-12">
+            Set your AI<br>
+            <span class="italic text-accent">chats free.</span>
+          </h1>
+
+          <p class="font-sans text-lg md:text-xl text-muted-foreground max-w-xl leading-relaxed mb-16">
+            Your conversations are trapped across ChatGPT, Claude, and Gemini. Liberator unifies them in one searchable, local-first database.
+          </p>
+
+          <div class="flex flex-col sm:flex-row gap-4">
+            <button class="btn-primary bg-foreground text-background px-8 h-14 text-xs uppercase tracking-[0.2em] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.25)] transition-all duration-500">
+              <span class="gold-overlay"></span>
+              <span class="btn-content flex items-center gap-3">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                Install Extension
+              </span>
+            </button>
+            <a href="https://github.com/mattarderne/liberator" target="_blank" class="border border-foreground bg-transparent text-foreground px-8 h-14 text-xs uppercase tracking-[0.2em] font-medium hover:bg-foreground hover:text-background transition-all duration-500 flex items-center justify-center gap-3">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+              Clone Repo
+            </a>
+            <button id="remix-btn" class="border-2 border-accent bg-transparent text-accent px-8 h-14 text-xs uppercase tracking-[0.2em] font-medium hover:bg-accent hover:text-foreground transition-all duration-500 flex items-center justify-center gap-3">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+              Remix This
+            </button>
+          </div>
+
+          <!-- Metadata -->
+          <div class="mt-16 flex items-center gap-6 text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+            <span>Local Encrypted</span>
+            <div class="h-px w-4 bg-muted-foreground/30"></div>
+            <span>Open Source</span>
+            <div class="h-px w-4 bg-muted-foreground/30"></div>
+            <span>Chrome / Brave / Arc</span>
+          </div>
+        </div>
+
+        <!-- Right column - decorative -->
+        <div class="hidden lg:block col-span-3 relative">
+          <div class="absolute bottom-0 right-0 text-[200px] font-serif text-foreground/[0.03] leading-none select-none">
+            01
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Problem Section -->
+  <section class="py-32 border-t border-foreground/10 bg-foreground relative">
+    <div class="max-w-[1600px] mx-auto px-8 md:px-16">
+      <div class="grid grid-cols-12 gap-8 lg:gap-16">
+        <!-- Left column -->
+        <div class="col-span-12 lg:col-span-5 lg:col-start-2">
+          <div class="flex items-center gap-4 mb-8">
+            <div class="h-px w-8 md:w-12 bg-background/30"></div>
+            <span class="text-[10px] uppercase tracking-[0.3em] text-background/60">The Problem</span>
+          </div>
+
+          <h2 class="font-serif text-4xl md:text-5xl lg:text-6xl text-background leading-[0.95] mb-8">
+            Digital<br>
+            <span class="italic text-accent">Amnesia.</span>
+          </h2>
+
+          <p class="drop-cap font-sans text-lg text-background/70 leading-relaxed mb-12">
+            Power users juggle multiple AI providers daily. But once the tab closes, the context is lost in a walled garden. Your knowledge scatters across silos, unreachable and unsearchable.
+          </p>
+        </div>
+
+        <!-- Right column - problems list -->
+        <div class="col-span-12 lg:col-span-5">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-16 mt-8 lg:mt-24">
+            <div class="border-t border-background/20 pt-8">
+              <span class="font-serif italic text-accent text-sm mb-4 block">01</span>
+              <h3 class="text-background font-serif text-xl mb-3">Locked in Silos</h3>
+              <p class="text-background/60 text-sm leading-relaxed">Each provider keeps your conversations hostage. No exports, no interoperability.</p>
+            </div>
+            <div class="border-t border-background/20 pt-8">
+              <span class="font-serif italic text-accent text-sm mb-4 block">02</span>
+              <h3 class="text-background font-serif text-xl mb-3">Lost Knowledge</h3>
+              <p class="text-background/60 text-sm leading-relaxed">Where was that API conversation? Claude? ChatGPT? You can't remember.</p>
+            </div>
+            <div class="border-t border-background/20 pt-8">
+              <span class="font-serif italic text-accent text-sm mb-4 block">03</span>
+              <h3 class="text-background font-serif text-xl mb-3">Fragmented Context</h3>
+              <p class="text-background/60 text-sm leading-relaxed">You can't ask Claude about your ChatGPT discussion. Context doesn't travel.</p>
+            </div>
+            <div class="border-t border-background/20 pt-8">
+              <span class="font-serif italic text-accent text-sm mb-4 block">04</span>
+              <h3 class="text-background font-serif text-xl mb-3">Zero Visibility</h3>
+              <p class="text-background/60 text-sm leading-relaxed">No idea which provider gets your tokens or where ideas became deployments.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Demo Video -->
+  <section id="demo" class="py-24 px-8 md:px-16 border-t border-foreground/10 bg-muted/30">
+    <div class="max-w-[1600px] mx-auto">
+      <div class="grid grid-cols-12 gap-8">
+        <div class="col-span-12 lg:col-span-8 lg:col-start-3 text-center">
+          <div class="flex items-center justify-center gap-4 mb-8">
+            <div class="h-px w-8 md:w-12 bg-foreground"></div>
+            <span class="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">See It In Action</span>
+            <div class="h-px w-8 md:w-12 bg-foreground"></div>
+          </div>
+
+          <!-- Video placeholder - will be replaced with actual video -->
+          <div class="relative aspect-video bg-foreground/5 border border-foreground/10 overflow-hidden group cursor-pointer" id="demo-video-container">
+            <div class="absolute inset-0 flex items-center justify-center">
+              <div class="text-center">
+                <div class="w-20 h-20 bg-foreground text-background flex items-center justify-center mx-auto mb-4 group-hover:bg-accent transition-colors duration-500">
+                  <svg class="w-8 h-8 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                </div>
+                <p class="text-sm text-muted-foreground">Watch the demo</p>
+              </div>
+            </div>
+            <!-- Video will be embedded here -->
+            <video id="demo-video" class="hidden w-full h-full object-cover" controls>
+              <source src="demo.mp4" type="video/mp4">
+            </video>
+          </div>
+
+          <p class="mt-8 text-muted-foreground text-sm">
+            Search across all your AI conversations. Filter by provider. Find what you need in seconds.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Open Ideas -->
+  <section id="open-ideas" class="py-24 px-8 md:px-16 border-t border-foreground/10">
+    <div class="max-w-[1600px] mx-auto">
+      <div class="grid grid-cols-12 gap-8 lg:gap-16">
+        <div class="col-span-12 lg:col-span-5 lg:col-start-2">
+          <div class="flex items-center gap-4 mb-8">
+            <div class="h-px w-8 md:w-12 bg-foreground"></div>
+            <span class="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">A New Paradigm</span>
+          </div>
+
+          <h2 class="font-serif text-4xl md:text-5xl leading-[0.95] mb-8">
+            Open<br>
+            <span class="italic text-accent">Ideas.</span>
+          </h2>
+
+          <p class="font-sans text-lg text-muted-foreground leading-relaxed mb-6">
+            <strong class="text-foreground">Open Source</strong> shares code for others to fork, modify, and study.
+          </p>
+          <p class="font-sans text-lg text-muted-foreground leading-relaxed mb-8">
+            <strong class="text-foreground">Open Ideas</strong> shares the <em>concepts</em> that AI can recreate. Clone the repo, or just grab the prompt and build your own.
+          </p>
+
+          <button id="open-ideas-remix-btn" class="border-2 border-accent bg-transparent text-accent px-8 h-14 text-xs uppercase tracking-[0.2em] font-medium hover:bg-accent hover:text-foreground transition-all duration-500 flex items-center gap-3">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            Remix This Project
+          </button>
+        </div>
+
+        <div class="col-span-12 lg:col-span-4 lg:col-start-8">
+          <div class="bg-foreground p-8 h-full">
+            <h3 class="font-serif text-xl text-background mb-6">Why Open Ideas?</h3>
+            <div class="space-y-4 text-background/70 text-sm">
+              <div class="flex items-start gap-4">
+                <span class="text-accent font-serif italic">01</span>
+                <p>With AI coding assistants, a well-crafted prompt captures intent better than code.</p>
+              </div>
+              <div class="flex items-start gap-4">
+                <span class="text-accent font-serif italic">02</span>
+                <p>The prompt shares architecture and patterns. The AI handles implementation.</p>
+              </div>
+              <div class="flex items-start gap-4">
+                <span class="text-accent font-serif italic">03</span>
+                <p>Remix, improve, and contribute back. The idea evolves with each recreation.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section id="features" class="py-32 px-8 md:px-16 border-t border-foreground/10">
+    <div class="max-w-[1600px] mx-auto">
+      <!-- Section header -->
+      <div class="grid grid-cols-12 gap-8 mb-24">
+        <div class="col-span-12 lg:col-span-6 lg:col-start-2">
+          <div class="flex items-center gap-4 mb-8">
+            <div class="h-px w-8 md:w-12 bg-foreground"></div>
+            <span class="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Features</span>
+          </div>
+          <h2 class="font-serif text-4xl md:text-5xl lg:text-6xl leading-[0.95]">
+            Own your<br>
+            <span class="italic text-accent">conversations.</span>
+          </h2>
+        </div>
+        <div class="col-span-12 lg:col-span-4">
+          <p class="font-sans text-muted-foreground leading-relaxed lg:pt-16">
+            Everything you need to reclaim your digital memory from the cloud giants. Local-first, privacy-respecting, endlessly powerful.
+          </p>
+        </div>
+      </div>
+
+      <!-- Feature grid -->
+      <div class="grid grid-cols-12 gap-8">
+        <!-- Large feature card -->
+        <div class="col-span-12 lg:col-span-7 lg:col-start-2 border-t border-foreground pt-8 group">
+          <div class="flex justify-between items-start mb-12">
+            <span class="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">01 / Core Feature</span>
+            <span class="font-serif italic text-accent text-sm">Primary</span>
+          </div>
+          <h3 class="font-serif text-3xl md:text-4xl mb-6">Universal Search</h3>
+          <p class="font-sans text-muted-foreground text-lg leading-relaxed max-w-xl mb-12">
+            Find any conversation across all providers. Regex support, date filtering, and semantic matching. One search bar to rule them all.
+          </p>
+
+          <!-- Terminal mockup -->
+          <div class="bg-foreground p-6 md:p-8">
+            <div class="font-mono text-sm text-background/80">
+              <div class="flex items-center gap-2 border-b border-background/10 pb-4 mb-4">
+                <span class="text-accent">$</span>
+                <span class="text-background">find "auth flow" --provider=claude</span>
+              </div>
+              <div class="space-y-2 text-background/50">
+                <p>[Claude] Re: OAuth2 Implementation details...</p>
+                <p>[ChatGPT] Auth flow best practices...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right side features -->
+        <div class="col-span-12 lg:col-span-3 space-y-8">
+          <div class="border-t border-foreground pt-8 transition-luxury hover:bg-background/50 p-0 hover:p-6 -m-0 hover:-m-6">
+            <span class="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-6 block">02</span>
+            <h3 class="font-serif text-xl mb-3">Local-first</h3>
+            <p class="font-sans text-muted-foreground text-sm leading-relaxed">Everything stored in IndexedDB on your machine. Your data never leaves localhost.</p>
+          </div>
+
+          <div class="border-t border-foreground pt-8 transition-luxury hover:bg-background/50 p-0 hover:p-6 -m-0 hover:-m-6">
+            <span class="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-6 block">03</span>
+            <h3 class="font-serif text-xl mb-3">Auto-sync</h3>
+            <p class="font-sans text-muted-foreground text-sm leading-relaxed">Background discovery and sync. Full history pulled without manual export work.</p>
+          </div>
+
+          <div class="border-t border-foreground pt-8 transition-luxury hover:bg-background/50 p-0 hover:p-6 -m-0 hover:-m-6">
+            <span class="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-6 block">04</span>
+            <h3 class="font-serif text-xl mb-3">AI Classification</h3>
+            <p class="font-sans text-muted-foreground text-sm leading-relaxed">Automatic summaries, status tracking, and PII detection via localized models.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Second row of features -->
+      <div class="grid grid-cols-12 gap-8 mt-24">
+        <div class="col-span-12 lg:col-span-3 lg:col-start-2 border-t border-foreground pt-8 transition-luxury hover:bg-background/50 p-0 hover:p-6 -m-0 hover:-m-6">
+          <span class="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-6 block">05</span>
+          <h3 class="font-serif text-xl mb-3">Thread Linking</h3>
+          <p class="font-sans text-muted-foreground text-sm leading-relaxed">Connect related conversations across providers. Track multi-chat projects.</p>
+        </div>
+
+        <div class="col-span-12 lg:col-span-3 border-t-4 border-accent pt-8 transition-luxury hover:bg-background/50 p-0 hover:p-6 -m-0 hover:-m-6">
+          <div class="flex justify-between items-start mb-6">
+            <span class="text-[10px] uppercase tracking-[0.3em] text-accent">06 / New</span>
+          </div>
+          <h3 class="font-serif text-xl mb-3">Graph Visualization</h3>
+          <p class="font-sans text-muted-foreground text-sm leading-relaxed">Interactive force graph with cluster shading. See threads grouped by category, linked by similarity.</p>
+        </div>
+
+        <div class="col-span-12 lg:col-span-3 border-t-4 border-accent pt-8 transition-luxury hover:bg-background/50 p-0 hover:p-6 -m-0 hover:-m-6">
+          <div class="flex justify-between items-start mb-6">
+            <span class="text-[10px] uppercase tracking-[0.3em] text-accent">07 / New</span>
+          </div>
+          <h3 class="font-serif text-xl mb-3">Vector Embeddings</h3>
+          <p class="font-sans text-muted-foreground text-sm leading-relaxed">Find semantically similar conversations. OpenAI embeddings stored locally for instant search.</p>
+        </div>
+      </div>
+
+      <!-- Third row -->
+      <div class="grid grid-cols-12 gap-8 mt-8">
+        <div class="col-span-12 lg:col-span-3 lg:col-start-5 border-t border-foreground pt-8 transition-luxury hover:bg-background/50 p-0 hover:p-6 -m-0 hover:-m-6">
+          <span class="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-6 block">08</span>
+          <h3 class="font-serif text-xl mb-3">Export JSON</h3>
+          <p class="font-sans text-muted-foreground text-sm leading-relaxed">Migrate to Obsidian or build your own tools. It's your data.</p>
+        </div>
+
+        <div class="col-span-12 lg:col-span-3 border-t border-foreground pt-8 transition-luxury hover:bg-background/50 p-0 hover:p-6 -m-0 hover:-m-6">
+          <span class="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-6 block">09</span>
+          <h3 class="font-serif text-xl mb-3">MCP Access</h3>
+          <p class="font-sans text-muted-foreground text-sm leading-relaxed">Query your chat history from Claude Code via Model Context Protocol.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Process / Demo -->
+  <section id="process" class="py-32 px-8 md:px-16 bg-muted border-t border-foreground/10">
+    <div class="max-w-[1600px] mx-auto">
+      <div class="grid grid-cols-12 gap-8 lg:gap-16">
+        <!-- Left column - text -->
+        <div class="col-span-12 lg:col-span-5 lg:col-start-2">
+          <div class="flex items-center gap-4 mb-8">
+            <div class="h-px w-8 md:w-12 bg-foreground"></div>
+            <span class="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">The Process</span>
+          </div>
+
+          <h2 class="font-serif text-4xl md:text-5xl lg:text-6xl leading-[0.95] mb-12">
+            Chat with<br>
+            your <span class="italic text-accent">chats.</span>
+          </h2>
+
+          <p class="font-sans text-lg text-muted-foreground leading-relaxed mb-16">
+            The real power isn't aggregation—it's access. Ask Claude about a ChatGPT conversation. Query your entire AI history from the command line.
+          </p>
+
+          <!-- Process steps -->
+          <div class="space-y-0">
+            <div class="border-t border-foreground/20 py-8 flex items-start gap-8">
+              <span class="font-serif italic text-accent text-2xl">01</span>
+              <div>
+                <h4 class="font-serif text-lg mb-2">Discuss auth flow in ChatGPT</h4>
+                <p class="text-muted-foreground text-sm">Begin your research in one provider</p>
+              </div>
+            </div>
+            <div class="border-t border-foreground/20 py-8 flex items-start gap-8">
+              <span class="font-serif italic text-accent text-2xl">02</span>
+              <div>
+                <h4 class="font-serif text-lg mb-2">Debug the code in Claude</h4>
+                <p class="text-muted-foreground text-sm">Continue development elsewhere</p>
+              </div>
+            </div>
+            <div class="border-t border-foreground/20 border-b py-8 flex items-start gap-8">
+              <span class="font-serif italic text-accent text-2xl">03</span>
+              <div>
+                <h4 class="font-serif text-lg mb-2">Full Context. Any Provider.</h4>
+                <p class="text-muted-foreground text-sm">Access everything, everywhere</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right column - terminal -->
+        <div class="col-span-12 lg:col-span-5">
+          <div class="lg:mt-32">
+            <!-- Vertical label -->
+            <div class="hidden lg:flex justify-end mb-4">
+              <span class="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">CLI & MCP Enabled</span>
+            </div>
+
+            <div class="bg-foreground shadow-[0_8px_32px_rgba(0,0,0,0.12)] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]">
+              <div class="bg-foreground px-6 py-4 flex items-center justify-between border-b border-background/10">
+                <div class="flex items-center gap-2">
+                  <div class="w-3 h-3 bg-muted-foreground/30"></div>
+                  <div class="w-3 h-3 bg-muted-foreground/30"></div>
+                  <div class="w-3 h-3 bg-muted-foreground/30"></div>
+                </div>
+                <span class="text-[10px] uppercase tracking-[0.2em] text-background/40">Terminal</span>
+              </div>
+              <div id="terminal" class="p-6 md:p-8 font-mono text-sm h-[420px] overflow-y-auto text-background/80">
+                <div class="mb-2 text-background/50">Liberator v1.0.4 - Interactive Shell</div>
+                <div class="mb-2 text-background/50">Type 'help' for commands.</div>
+                <div class="mb-4"></div>
+                <div id="terminal-output"></div>
+                <div class="text-accent">$ <span id="cursor" class="inline-block w-2 h-4 bg-accent ml-1 animate-blink align-middle"></span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Roadmap -->
+  <section id="roadmap" class="py-32 px-8 md:px-16 border-t border-foreground/10">
+    <div class="max-w-[1600px] mx-auto">
+      <!-- Section header -->
+      <div class="grid grid-cols-12 gap-8 mb-24">
+        <div class="col-span-12 lg:col-span-6 lg:col-start-2">
+          <div class="flex items-center gap-4 mb-8">
+            <div class="h-px w-8 md:w-12 bg-foreground"></div>
+            <span class="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">The Journey</span>
+          </div>
+          <h2 class="font-serif text-4xl md:text-5xl lg:text-6xl leading-[0.95]">
+            Transmission<br>
+            <span class="italic text-accent">Uplink.</span>
+          </h2>
+        </div>
+      </div>
+
+      <!-- Roadmap items -->
+      <div class="grid grid-cols-12 gap-8">
+        <div class="col-span-12 lg:col-span-10 lg:col-start-2">
+          <!-- Timeline -->
+          <div class="relative">
+            <!-- Vertical line -->
+            <div class="absolute left-0 md:left-1/2 top-0 bottom-0 w-px bg-foreground/20 -translate-x-1/2"></div>
+
+            <!-- Item 1 - Live -->
+            <div class="relative grid grid-cols-1 md:grid-cols-2 gap-8 pb-24">
+              <div class="md:text-right md:pr-16">
+                <span class="inline-block text-[10px] uppercase tracking-[0.3em] text-accent border border-accent px-3 py-1 mb-4">Live</span>
+                <h3 class="font-serif text-2xl md:text-3xl mb-4">Vector Search & Visualization</h3>
+                <p class="text-muted-foreground leading-relaxed">Semantic similarity with interactive graph. Cluster shading, display modes, and similarity-based thread discovery.</p>
+              </div>
+              <div class="hidden md:block"></div>
+              <!-- Dot -->
+              <div class="absolute left-0 md:left-1/2 top-1 w-4 h-4 -translate-x-1/2 bg-accent shadow-[0_0_0_4px_rgba(212,175,55,0.2)]"></div>
+            </div>
+
+            <!-- Item 2 -->
+            <div class="relative grid grid-cols-1 md:grid-cols-2 gap-8 pb-24">
+              <div class="hidden md:block"></div>
+              <div class="md:pl-16">
+                <span class="inline-block text-[10px] uppercase tracking-[0.3em] text-muted-foreground border border-foreground/20 px-3 py-1 mb-4">Development</span>
+                <h3 class="font-serif text-2xl md:text-3xl mb-4">Obsidian Sync</h3>
+                <p class="text-muted-foreground leading-relaxed">Export threads to your Obsidian vault with frontmatter. Background sync via REST API or manual download.</p>
+              </div>
+              <!-- Dot -->
+              <div class="absolute left-0 md:left-1/2 top-1 w-4 h-4 -translate-x-1/2 bg-background border-2 border-foreground/30"></div>
+            </div>
+
+            <!-- Item 3 -->
+            <div class="relative grid grid-cols-1 md:grid-cols-2 gap-8 pb-24">
+              <div class="md:text-right md:pr-16">
+                <span class="inline-block text-[10px] uppercase tracking-[0.3em] text-muted-foreground border border-foreground/20 px-3 py-1 mb-4">Planned</span>
+                <h3 class="font-serif text-2xl md:text-3xl mb-4">Analytics Dashboard</h3>
+                <p class="text-muted-foreground leading-relaxed">Token usage, provider breakdown, activity patterns. Know where your AI time (and money) goes.</p>
+              </div>
+              <div class="hidden md:block"></div>
+              <!-- Dot -->
+              <div class="absolute left-0 md:left-1/2 top-1 w-4 h-4 -translate-x-1/2 bg-background border-2 border-foreground/30"></div>
+            </div>
+
+            <!-- Item 4 -->
+            <div class="relative grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div class="hidden md:block"></div>
+              <div class="md:pl-16">
+                <span class="inline-block text-[10px] uppercase tracking-[0.3em] text-muted-foreground border border-foreground/20 px-3 py-1 mb-4">Research</span>
+                <h3 class="font-serif text-2xl md:text-3xl mb-4">Chat with Context</h3>
+                <p class="text-muted-foreground leading-relaxed">Inject previous conversations into new prompts automatically. Contextual continuity across providers.</p>
+              </div>
+              <!-- Dot -->
+              <div class="absolute left-0 md:left-1/2 top-1 w-4 h-4 -translate-x-1/2 bg-background border-2 border-foreground/30"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer / CTA -->
+  <footer class="py-32 border-t border-foreground/10 bg-foreground">
+    <div class="max-w-[1600px] mx-auto px-8 md:px-16">
+      <div class="grid grid-cols-12 gap-8">
+        <div class="col-span-12 lg:col-span-8 lg:col-start-3 text-center">
+          <div class="flex items-center justify-center gap-4 mb-12">
+            <div class="h-px w-8 md:w-12 bg-background/30"></div>
+            <span class="text-[10px] uppercase tracking-[0.3em] text-background/60">Begin</span>
+            <div class="h-px w-8 md:w-12 bg-background/30"></div>
+          </div>
+
+          <h2 class="font-serif text-4xl md:text-5xl lg:text-7xl text-background leading-[0.95] mb-8">
+            Ready to <span class="italic text-accent">liberate</span><br>your chats?
+          </h2>
+
+          <p class="font-sans text-lg text-background/60 mb-12 max-w-lg mx-auto">
+            Chrome extension. Installs in seconds. Data stays local.
+          </p>
+
+          <button class="btn-primary bg-background text-foreground px-12 h-16 text-xs uppercase tracking-[0.2em] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.25)] transition-all duration-500 mb-16">
+            <span class="gold-overlay"></span>
+            <span class="btn-content">Get Liberator</span>
+          </button>
+
+          <!-- Social links -->
+          <div class="flex justify-center items-center gap-8 mb-12">
+            <a href="https://github.com/mattarderne/liberator" target="_blank" class="text-background/40 hover:text-accent transition-all duration-500">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            </a>
+            <a href="https://x.com/mattarderne" target="_blank" class="text-background/40 hover:text-accent transition-all duration-500">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </a>
+          </div>
+
+          <!-- Copyright -->
+          <div class="text-[10px] uppercase tracking-[0.25em] text-background/40">
+            <p>2024 Liberator. Local-first. Privacy-respecting. Open source.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Remix Modal -->
+  <div id="remix-modal" class="fixed inset-0 z-[100] hidden">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-foreground/80 backdrop-blur-sm" id="remix-backdrop"></div>
+
+    <!-- Modal -->
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+      <div class="bg-background max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+        <!-- Header -->
+        <div class="border-b border-foreground/10 p-8">
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-[10px] uppercase tracking-[0.3em] text-accent mb-2 block">Open Ideas</span>
+              <h2 class="font-serif text-3xl">Remix This Project</h2>
+            </div>
+            <button id="remix-close" class="w-10 h-10 flex items-center justify-center hover:bg-foreground/5 transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Body -->
+        <div class="p-8 space-y-8">
+          <p class="text-muted-foreground">
+            Configure your remix and copy the prompt to paste into Claude Code or your preferred AI assistant.
+          </p>
+
+          <!-- Platform Selection -->
+          <div>
+            <label class="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-4 block">Platform</label>
+            <div class="flex gap-4">
+              <label class="flex-1 border border-foreground/20 p-4 cursor-pointer hover:border-accent transition-colors has-[:checked]:border-accent has-[:checked]:bg-accent/5">
+                <input type="radio" name="platform" value="chrome" class="sr-only" checked>
+                <div class="flex items-center gap-3">
+                  <svg class="w-6 h-6 text-foreground" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="12" r="4"/></svg>
+                  <span class="font-medium">Chrome</span>
+                </div>
+              </label>
+              <label class="flex-1 border border-foreground/20 p-4 cursor-pointer hover:border-accent transition-colors has-[:checked]:border-accent has-[:checked]:bg-accent/5">
+                <input type="radio" name="platform" value="firefox" class="sr-only">
+                <div class="flex items-center gap-3">
+                  <svg class="w-6 h-6 text-foreground" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 6v6l4 2"/></svg>
+                  <span class="font-medium">Firefox</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Provider Selection -->
+          <div>
+            <label class="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-4 block">AI Providers</label>
+            <div class="grid grid-cols-2 gap-4">
+              <label class="border border-foreground/20 p-4 cursor-pointer hover:border-accent transition-colors has-[:checked]:border-accent has-[:checked]:bg-accent/5">
+                <input type="checkbox" name="providers" value="all" class="sr-only" id="provider-all" checked>
+                <div class="flex items-center gap-3">
+                  <div class="w-6 h-6 bg-foreground text-background flex items-center justify-center text-xs font-bold">*</div>
+                  <span class="font-medium">All Providers</span>
+                </div>
+              </label>
+              <label class="border border-foreground/20 p-4 cursor-pointer hover:border-accent transition-colors has-[:checked]:border-accent has-[:checked]:bg-accent/5">
+                <input type="checkbox" name="providers" value="chatgpt" class="sr-only" id="provider-chatgpt">
+                <div class="flex items-center gap-3">
+                  <div class="w-6 h-6 bg-[#10a37f] text-white flex items-center justify-center text-xs font-bold rounded-sm">G</div>
+                  <span class="font-medium">ChatGPT</span>
+                </div>
+              </label>
+              <label class="border border-foreground/20 p-4 cursor-pointer hover:border-accent transition-colors has-[:checked]:border-accent has-[:checked]:bg-accent/5">
+                <input type="checkbox" name="providers" value="claude" class="sr-only" id="provider-claude">
+                <div class="flex items-center gap-3">
+                  <div class="w-6 h-6 bg-[#d4a574] text-white flex items-center justify-center text-xs font-bold rounded-sm">C</div>
+                  <span class="font-medium">Claude</span>
+                </div>
+              </label>
+              <label class="border border-foreground/20 p-4 cursor-pointer hover:border-accent transition-colors has-[:checked]:border-accent has-[:checked]:bg-accent/5">
+                <input type="checkbox" name="providers" value="gemini" class="sr-only" id="provider-gemini">
+                <div class="flex items-center gap-3">
+                  <div class="w-6 h-6 bg-[#4285f4] text-white flex items-center justify-center text-xs font-bold rounded-sm">G</div>
+                  <span class="font-medium">Gemini</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Prompt Preview -->
+          <div>
+            <label class="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-4 block">Generated Prompt</label>
+            <div class="bg-foreground text-background p-6 font-mono text-sm max-h-64 overflow-y-auto" id="prompt-preview">
+              <!-- Filled by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="border-t border-foreground/10 p-8 flex items-center justify-between">
+          <p class="text-sm text-muted-foreground">
+            Paste into Claude Code and run
+          </p>
+          <button id="copy-prompt-btn" class="btn-primary bg-foreground text-background px-8 h-12 text-xs uppercase tracking-[0.2em] font-medium flex items-center gap-3">
+            <span class="gold-overlay"></span>
+            <span class="btn-content flex items-center gap-3">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+              Copy Prompt
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Terminal Animation Script -->
+  <script>
+    const script = [
+      { type: 'input', text: 'liberator query "auth flow details"' },
+      { type: 'output', text: 'Searching 428 conversations across 3 providers...' },
+      { type: 'output', text: '> Found matches in [ChatGPT-291], [Claude-882]', class: 'text-accent' },
+      { type: 'output', text: '---' },
+      { type: 'input', text: 'liberator ask "Summarize the auth logic we decided on"' },
+      { type: 'output', text: 'Analyzing context...' },
+      { type: 'output', text: 'Based on your conversation in Claude (Nov 12) and ChatGPT (Nov 14):\n\nYou decided on a hybrid OAuth2 flow. The frontend handles the initial handshake, passing the code to the backend for token exchange. You specifically avoided storing refresh tokens in localStorage due to XSS concerns raised in the ChatGPT discussion.' },
+    ];
+
+    let lineIndex = 0;
+    let charIndex = 0;
+    const output = document.getElementById('terminal-output');
+    const cursor = document.getElementById('cursor');
+
+    function typeChar() {
+      if (lineIndex >= script.length) {
+        setTimeout(() => {
+          output.innerHTML = '';
+          lineIndex = 0;
+          charIndex = 0;
+          runTerminal();
+        }, 8000);
+        return;
+      }
+
+      const step = script[lineIndex];
+
+      if (step.type === 'input') {
+        if (charIndex === 0) {
+          const inputLine = document.createElement('div');
+          inputLine.className = 'mb-2 text-accent';
+          inputLine.id = 'current-input';
+          inputLine.innerHTML = '$ ';
+          output.appendChild(inputLine);
+        }
+
+        const inputLine = document.getElementById('current-input');
+        if (charIndex < step.text.length) {
+          inputLine.innerHTML = '$ ' + step.text.substring(0, charIndex + 1);
+          charIndex++;
+          setTimeout(typeChar, 50 + Math.random() * 40);
+        } else {
+          inputLine.removeAttribute('id');
+          charIndex = 0;
+          lineIndex++;
+          setTimeout(typeChar, 600);
+        }
+      } else {
+        const outputLine = document.createElement('div');
+        outputLine.className = 'mb-2 whitespace-pre-wrap ' + (step.class || 'text-background/70');
+        outputLine.textContent = step.text;
+        output.appendChild(outputLine);
+        lineIndex++;
+        setTimeout(typeChar, 800);
+      }
+    }
+
+    function runTerminal() {
+      setTimeout(typeChar, 2500);
+    }
+
+    runTerminal();
+  </script>
+
+  <!-- Remix Modal Script -->
+  <script>
+    // Remix prompt generator
+    const remixModal = document.getElementById('remix-modal');
+    const remixBtn = document.getElementById('remix-btn');
+    const remixBtnAlt = document.getElementById('open-ideas-remix-btn');
+    const remixClose = document.getElementById('remix-close');
+    const remixBackdrop = document.getElementById('remix-backdrop');
+    const copyPromptBtn = document.getElementById('copy-prompt-btn');
+    const promptPreview = document.getElementById('prompt-preview');
+    const providerAll = document.getElementById('provider-all');
+
+    function generatePrompt() {
+      const platform = document.querySelector('input[name="platform"]:checked')?.value || 'chrome';
+      const providers = [];
+
+      if (providerAll.checked) {
+        providers.push('ChatGPT', 'Claude', 'Gemini', 'Grok', 'Copilot');
+      } else {
+        if (document.getElementById('provider-chatgpt').checked) providers.push('ChatGPT');
+        if (document.getElementById('provider-claude').checked) providers.push('Claude');
+        if (document.getElementById('provider-gemini').checked) providers.push('Gemini');
+      }
+
+      const providersStr = providers.length > 0 ? providers.join(', ') : 'ChatGPT, Claude, Gemini';
+
+      return `# Remix: AI Chat Liberator
+
+Build a ${platform === 'chrome' ? 'Chrome' : 'Firefox'} extension that extracts conversations from AI chat platforms (${providersStr}).
+
+## Core Architecture
+- Content scripts for each provider with DOM extraction
+- Background service worker for sync coordination
+- IndexedDB for local-first storage
+- Popup UI for quick search and access
+
+## Key Patterns
+
+### 1. Chat Extraction (Content Scripts)
+Each provider needs a content script that:
+- Uses provider-specific selectors (data-testid, class patterns)
+- Extracts message text with role (user/assistant)
+- Uses clipboard-based extraction for code blocks (preserves formatting)
+- Has fallback mechanisms for UI changes
+
+### 2. Sync Mechanism
+Two-phase approach:
+- Discovery: Scan sidebar for chat list (ID, title, URL)
+- Deep Sync: Extract full conversation content
+- Content hashing to skip unchanged threads
+- Adaptive backoff with error classification
+
+### 3. Storage (IndexedDB)
+Stores: threads, messages, artifacts, syncQueue
+- Thread: provider, title, message_count, last_synced_at
+- Message: role, text, created_at, thread_id
+- Deduplication at thread and message level
+
+### 4. Popup UI
+- Search input with instant results
+- Filter by provider
+- Click to open full thread view
+- Keyboard shortcuts (/, J/K, Enter)
+
+## Platform: ${platform === 'chrome' ? 'Chrome (Manifest V3)' : 'Firefox (Manifest V2/V3)'}
+## Providers: ${providersStr}
+
+## Final Task
+After implementation, review the original repo at:
+https://github.com/mattarderne/liberator
+
+Compare your implementation and:
+1. Suggest improvements to this prompt
+2. Note any discoveries or alternative approaches
+3. Submit a PR to improve the remix experience
+
+---
+Paste this into Claude Code and run.`;
+    }
+
+    function updatePromptPreview() {
+      const prompt = generatePrompt();
+      promptPreview.textContent = prompt;
+    }
+
+    function openModal() {
+      remixModal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      updatePromptPreview();
+    }
+
+    function closeModal() {
+      remixModal.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    async function copyPrompt() {
+      const prompt = generatePrompt();
+      try {
+        await navigator.clipboard.writeText(prompt);
+        const btnContent = copyPromptBtn.querySelector('.btn-content');
+        const originalText = btnContent.innerHTML;
+        btnContent.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg> Copied!';
+        setTimeout(() => {
+          btnContent.innerHTML = originalText;
+        }, 2000);
+      } catch (err) {
+        console.error('Failed to copy:', err);
+      }
+    }
+
+    // Event listeners
+    remixBtn?.addEventListener('click', openModal);
+    remixBtnAlt?.addEventListener('click', openModal);
+    remixClose?.addEventListener('click', closeModal);
+    remixBackdrop?.addEventListener('click', closeModal);
+    copyPromptBtn?.addEventListener('click', copyPrompt);
+
+    // Update preview when selections change
+    document.querySelectorAll('input[name="platform"], input[name="providers"]').forEach(input => {
+      input.addEventListener('change', () => {
+        // Handle "All" checkbox logic
+        if (input.value === 'all' && input.checked) {
+          document.querySelectorAll('input[name="providers"]:not([value="all"])').forEach(cb => cb.checked = false);
+        } else if (input.name === 'providers' && input.value !== 'all' && input.checked) {
+          providerAll.checked = false;
+        }
+        updatePromptPreview();
+      });
+    });
+
+    // Escape key to close
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !remixModal.classList.contains('hidden')) {
+        closeModal();
+      }
+    });
+
+    // Demo video click to play
+    const demoContainer = document.getElementById('demo-video-container');
+    const demoVideo = document.getElementById('demo-video');
+    demoContainer?.addEventListener('click', () => {
+      const placeholder = demoContainer.querySelector('.absolute');
+      if (placeholder && demoVideo) {
+        placeholder.classList.add('hidden');
+        demoVideo.classList.remove('hidden');
+        demoVideo.play();
+      }
+    });
+  </script>
+
+</body>
+</html>

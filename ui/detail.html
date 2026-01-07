@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Thread Details - AI Thread Hub</title>
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background: #f9fafb;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+      .back-btn {
+        background: none;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+        padding: 4px 8px;
+      }
+      h1 { margin: 0; font-size: 20px; flex: 1; }
+      .provider-badge {
+        font-size: 11px;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-weight: 500;
+        text-transform: uppercase;
+      }
+      .provider-claude { background: #fef3c7; color: #92400e; }
+      .provider-chatgpt { background: #d1fae5; color: #065f46; }
+      .provider-gemini { background: #dbeafe; color: #1e40af; }
+      .provider-grok { background: #fce7f3; color: #9d174d; }
+      .provider-copilot { background: #e0e7ff; color: #3730a3; }
+
+      /* Metadata badges */
+      .meta-badge {
+        display: inline-block;
+        font-size: 11px;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-weight: 500;
+      }
+      .meta-badge.repo { background: #dbeafe; color: #1e40af; }
+      .meta-badge.org { background: #f3e8ff; color: #6b21a8; }
+
+      .card {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 16px;
+      }
+      .card h2 {
+        margin: 0 0 12px 0;
+        font-size: 14px;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .field-row {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 12px;
+      }
+      .field-label {
+        width: 140px;
+        font-size: 12px;
+        color: #6b7280;
+        padding-top: 6px;
+      }
+      .field-value {
+        flex: 1;
+        font-size: 14px;
+      }
+
+      .flags {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      .flag {
+        font-size: 11px;
+        padding: 4px 8px;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      .flag.active { background: #fef2f2; color: #991b1b; }
+      .flag.inactive { background: #f3f4f6; color: #9ca3af; }
+
+      select, input, textarea {
+        width: 100%;
+        padding: 8px 10px;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        font-size: 14px;
+        font-family: inherit;
+      }
+      select:focus, input:focus, textarea:focus {
+        outline: none;
+        border-color: #3b82f6;
+      }
+      textarea { resize: vertical; min-height: 80px; }
+
+      .summary-text {
+        font-size: 14px;
+        line-height: 1.6;
+        color: #374151;
+      }
+
+      .message-list {
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+      }
+      .message {
+        padding: 10px 12px;
+        border-bottom: 1px solid #f3f4f6;
+        font-size: 13px;
+      }
+      .message:last-child { border-bottom: none; }
+      .message.user { background: #f0f9ff; }
+      .message.assistant { background: white; }
+      .message-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 4px;
+      }
+      .message-role {
+        font-size: 10px;
+        text-transform: uppercase;
+        color: #6b7280;
+      }
+      .message-time {
+        font-size: 10px;
+        color: #9ca3af;
+      }
+      .message-text {
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      .artifact-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .artifact {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        background: #f9fafb;
+        border-radius: 6px;
+        font-size: 13px;
+      }
+      .artifact-type {
+        font-size: 10px;
+        padding: 2px 6px;
+        background: #e5e7eb;
+        border-radius: 4px;
+        text-transform: uppercase;
+      }
+
+      .btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+      }
+      .btn-primary { background: #3b82f6; color: white; }
+      .btn-primary:hover { background: #2563eb; }
+      .btn-secondary { background: #e5e7eb; color: #374151; }
+
+      .actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 16px;
+      }
+
+      .meta {
+        font-size: 12px;
+        color: #6b7280;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <button class="back-btn" id="back" title="Back to list">&larr;</button>
+      <h1 id="title">Loading...</h1>
+      <span class="provider-badge" id="provider"></span>
+    </header>
+
+    <div class="card">
+      <h2>Summary</h2>
+      <div class="summary-text" id="summary">Loading...</div>
+    </div>
+
+    <div class="card">
+      <h2>Status & Outcome</h2>
+      <div class="field-row">
+        <span class="field-label">Status</span>
+        <div class="field-value">
+          <select id="status">
+            <option value="unknown">Unknown</option>
+            <option value="open">Open</option>
+            <option value="in_progress">In Progress</option>
+            <option value="resolved">Resolved</option>
+            <option value="abandoned">Abandoned</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row">
+        <span class="field-label">AI Prediction</span>
+        <div class="field-value" id="outcome-prediction">-</div>
+      </div>
+      <div class="field-row">
+        <span class="field-label">Progress Stage</span>
+        <div class="field-value" id="progress-stage">-</div>
+      </div>
+      <div class="field-row">
+        <span class="field-label">Suggested Next</span>
+        <div class="field-value" id="suggested-next">-</div>
+      </div>
+      <div class="field-row">
+        <span class="field-label">Your Notes</span>
+        <div class="field-value">
+          <textarea id="user-note" placeholder="Add your notes about this thread..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Sensitive Content Flags</h2>
+      <div class="flags" id="flags">
+        <span class="flag" data-flag="contains_pii">PII</span>
+        <span class="flag" data-flag="contains_legal_sensitive">Legal</span>
+        <span class="flag" data-flag="contains_customer_sensitive">Customer</span>
+        <span class="flag" data-flag="contains_hr_sensitive">HR</span>
+        <span class="flag" data-flag="contains_security_or_secrets">Secrets</span>
+      </div>
+      <p class="meta" style="margin-top: 8px;">Click flags to toggle (overrides AI detection)</p>
+    </div>
+
+    <div class="card">
+      <h2>Messages (<span id="msg-count">0</span>)</h2>
+      <div class="message-list" id="messages">
+        <div class="message">Loading...</div>
+      </div>
+    </div>
+
+    <div class="card" id="artifacts-card" style="display: none;">
+      <h2>Artifacts (<span id="artifact-count">0</span>)</h2>
+      <div class="artifact-list" id="artifacts"></div>
+    </div>
+
+    <div class="card">
+      <h2>Metadata</h2>
+      <div class="field-row" id="github-repo-row" style="display: none;">
+        <span class="field-label">GitHub Repo</span>
+        <div class="field-value"><span class="meta-badge repo" id="github-repo">-</span></div>
+      </div>
+      <div class="field-row" id="organization-row" style="display: none;">
+        <span class="field-label">Organization</span>
+        <div class="field-value"><span class="meta-badge org" id="organization">-</span></div>
+      </div>
+      <div class="field-row" id="created-at-row" style="display: none;">
+        <span class="field-label">Created At</span>
+        <div class="field-value meta" id="created-at">-</div>
+      </div>
+      <div class="field-row">
+        <span class="field-label">Thread ID</span>
+        <div class="field-value meta" id="thread-id">-</div>
+      </div>
+      <div class="field-row">
+        <span class="field-label">Provider ID</span>
+        <div class="field-value meta" id="provider-id">-</div>
+      </div>
+      <div class="field-row">
+        <span class="field-label">URL</span>
+        <div class="field-value meta"><a id="url" href="#" target="_blank">-</a></div>
+      </div>
+      <div class="field-row">
+        <span class="field-label">Last Synced</span>
+        <div class="field-value meta" id="last-synced">-</div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" id="save">Save Changes</button>
+      <button class="btn btn-secondary" id="open-chat">Open Original Chat</button>
+    </div>
+
+    <script src="detail.js"></script>
+  </body>
+</html>

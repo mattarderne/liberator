@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>AI Thread Hub Settings</title>
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 24px;
+        background: #f9fafb;
+      }
+      h1 { margin: 0 0 24px 0; font-size: 22px; }
+      .card {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+      .card h2 {
+        margin: 0 0 16px 0;
+        font-size: 16px;
+        color: #111;
+      }
+      label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 14px;
+        font-weight: 500;
+      }
+      input[type="text"], input[type="password"], textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        font-size: 14px;
+        font-family: inherit;
+      }
+      input:focus, textarea:focus {
+        outline: none;
+        border-color: #3b82f6;
+      }
+      textarea {
+        min-height: 150px;
+        font-family: 'SF Mono', Monaco, monospace;
+        font-size: 12px;
+      }
+      .note {
+        font-size: 12px;
+        color: #6b7280;
+        margin-top: 6px;
+      }
+      .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+      }
+      .btn-primary { background: #3b82f6; color: white; }
+      .btn-primary:hover { background: #2563eb; }
+      .status {
+        margin-top: 12px;
+        padding: 10px;
+        border-radius: 6px;
+        font-size: 13px;
+      }
+      .status.success { background: #d1fae5; color: #065f46; }
+      .status.error { background: #fef2f2; color: #991b1b; }
+      .status:empty { display: none; }
+
+      .example {
+        background: #f3f4f6;
+        padding: 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-family: 'SF Mono', Monaco, monospace;
+        margin-top: 8px;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>AI Thread Hub Settings</h1>
+
+    <div class="card">
+      <h2>Appearance</h2>
+      <div style="margin-bottom: 12px;">
+        <label for="icon-style">Icon Style</label>
+        <select id="icon-style" style="width: 100%; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 14px; margin-top: 6px;">
+          <option value="lucide">Lucide (clean SVG icons)</option>
+          <option value="emoji">Emoji (colorful)</option>
+        </select>
+        <p class="note">Choose between minimal Lucide SVG icons or colorful emoji icons.</p>
+      </div>
+      <div id="icon-preview" style="margin-top: 12px; padding: 12px; background: #f3f4f6; border-radius: 6px; display: flex; gap: 16px; align-items: center;">
+        <span style="font-size: 13px; color: #6b7280;">Preview:</span>
+        <span id="preview-icons"></span>
+      </div>
+
+      <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+        <label for="ui-mode">Interface Mode</label>
+        <select id="ui-mode" style="width: 100%; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 14px; margin-top: 6px;">
+          <option value="full">Full (all features, tabs, graphs)</option>
+          <option value="minimal">Minimal (simple search and list)</option>
+        </select>
+        <p class="note">Choose between the full-featured interface or a streamlined minimal version.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>OpenAI API Key</h2>
+      <label for="api-key">API Key</label>
+      <input id="api-key" type="password" placeholder="sk-..." autocomplete="off" />
+      <p class="note">Required for automatic classification and summarization. Stored locally only.</p>
+    </div>
+
+    <div class="card">
+      <h2>Custom Columns</h2>
+      <label for="custom-columns">Configuration (JSON)</label>
+      <textarea id="custom-columns" placeholder="[]"></textarea>
+      <p class="note">Define custom attributes for AI to extract from threads.</p>
+      <div class="example">[
+  {
+    "key": "is_marketing_related",
+    "label": "Marketing Related",
+    "type": "boolean",
+    "ai_rule_prompt": "Set true if the thread discusses marketing topics",
+    "enabled": true
+  },
+  {
+    "key": "risk_level",
+    "label": "Risk Level",
+    "type": "enum",
+    "enum_values": ["low", "medium", "high"],
+    "ai_rule_prompt": "Assess risk level based on content sensitivity",
+    "enabled": true
+  }
+]</div>
+    </div>
+
+    <button class="btn btn-primary" id="save">Save Settings</button>
+    <div class="status" id="status"></div>
+
+    <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
+
+    <div class="card">
+      <h2>Claude Code Import</h2>
+      <p class="note" style="margin-bottom: 16px;">Import sessions from Claude Code CLI (stored in ~/.claude/projects/)</p>
+
+      <div style="display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
+        <button class="btn" id="import-claude-code" style="background: #8b5cf6; color: white;">
+          Import Sessions
+        </button>
+        <button class="btn" id="check-native-host" style="background: #6366f1; color: white;">
+          Check Native Host
+        </button>
+      </div>
+
+      <div id="claude-code-status" class="status" style="margin-bottom: 16px;"></div>
+
+      <div id="native-host-section" style="display: none; margin-top: 16px; padding: 16px; background: #f3f4f6; border-radius: 6px;">
+        <h3 style="margin: 0 0 12px 0; font-size: 14px;">Native Host Status</h3>
+        <div id="native-host-status" style="font-size: 13px; color: #374151;"></div>
+
+        <div style="margin-top: 16px;">
+          <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0;">
+            <input type="checkbox" id="auto-sync-claude-code" />
+            Enable automatic sync
+          </label>
+          <p class="note">Automatically import new Claude Code sessions when detected</p>
+        </div>
+
+        <div id="auto-sync-settings" style="display: none; margin-top: 12px;">
+          <label for="claude-code-interval">Sync Interval (minutes)</label>
+          <input id="claude-code-interval" type="number" value="5" min="1" max="60" style="width: 100px;" />
+        </div>
+
+        <button class="btn" id="sync-now-claude-code" style="background: #10b981; color: white; margin-top: 12px;">
+          Sync Now
+        </button>
+      </div>
+
+      <details style="margin-top: 16px;">
+        <summary style="cursor: pointer; font-size: 13px; color: #6b7280;">Setup Instructions</summary>
+        <div style="margin-top: 12px; font-size: 13px; color: #374151;">
+          <p><strong>Manual Import:</strong> Click "Import Sessions" to select your ~/.claude folder.</p>
+          <p style="margin-top: 8px;"><strong>Automatic Sync:</strong> Install the native messaging host:</p>
+          <ol style="margin: 8px 0 0 20px; padding: 0;">
+            <li>Navigate to extension folder: <code style="background: #e5e7eb; padding: 2px 6px; border-radius: 3px;">native-host/</code></li>
+            <li>Run: <code style="background: #e5e7eb; padding: 2px 6px; border-radius: 3px;">./install-host.sh</code></li>
+            <li>Enter your extension ID when prompted</li>
+            <li>Reload this extension</li>
+          </ol>
+        </div>
+      </details>
+    </div>
+
+    <div class="card">
+      <h2>Obsidian Sync</h2>
+      <div style="margin-bottom: 16px;">
+        <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0;">
+          <input type="checkbox" id="obsidian-enabled" />
+          Enable Obsidian Sync
+        </label>
+      </div>
+
+      <div id="obsidian-settings" style="display: none;">
+        <div style="margin-bottom: 16px;">
+          <label for="obsidian-method">Sync Method</label>
+          <select id="obsidian-method" style="width: 100%; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 14px;">
+            <option value="obsidian-rest-api">REST API (Obsidian Local REST API plugin)</option>
+            <option value="download-only">Download Only (manual export)</option>
+          </select>
+          <p class="note">REST API enables automatic sync. Download creates .md files for manual import.</p>
+        </div>
+
+        <div id="rest-api-settings">
+          <div style="margin-bottom: 16px;">
+            <label for="obsidian-endpoint">API Endpoint</label>
+            <input id="obsidian-endpoint" type="text" value="https://127.0.0.1:27124" placeholder="https://127.0.0.1:27124" />
+            <p class="note">Default is https://127.0.0.1:27124 (Obsidian Local REST API default)</p>
+          </div>
+
+          <div style="margin-bottom: 16px;">
+            <label for="obsidian-api-key">API Key</label>
+            <input id="obsidian-api-key" type="password" placeholder="Your Obsidian API key" autocomplete="off" />
+            <p class="note">Find this in Obsidian settings → Local REST API → Copy API Key</p>
+          </div>
+
+          <div style="margin-bottom: 16px;">
+            <label for="obsidian-interval">Sync Interval (minutes)</label>
+            <input id="obsidian-interval" type="number" value="30" min="5" max="1440" style="width: 100px;" />
+            <p class="note">How often to sync threads to Obsidian (5-1440 minutes)</p>
+          </div>
+
+          <button class="btn" id="test-obsidian" style="background: #6366f1; color: white; margin-bottom: 16px;">
+            Test Connection
+          </button>
+          <div id="obsidian-test-result" class="status"></div>
+        </div>
+
+        <hr style="margin: 20px 0; border: none; border-top: 1px solid #e5e7eb;">
+
+        <div style="margin-bottom: 16px;">
+          <label for="obsidian-folder">Target Folder</label>
+          <input id="obsidian-folder" type="text" value="AI Threads" placeholder="AI Threads" />
+          <p class="note">Folder in your vault where thread notes will be saved</p>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+          <label for="obsidian-structure">Folder Structure</label>
+          <select id="obsidian-structure" style="width: 100%; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 14px;">
+            <option value="by-provider">By Provider (e.g., AI Threads/claude/...)</option>
+            <option value="by-category">By Category (e.g., AI Threads/work/...)</option>
+            <option value="by-date">By Date (e.g., AI Threads/2025/01/...)</option>
+            <option value="flat">Flat (all notes in target folder)</option>
+          </select>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+          <label for="obsidian-messages">Include Messages</label>
+          <select id="obsidian-messages" style="width: 100%; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 14px;">
+            <option value="summary-only">Summary Only (metadata + summary)</option>
+            <option value="full">Full Conversation (all messages)</option>
+            <option value="none">None (metadata only)</option>
+          </select>
+          <p class="note">Full conversations create larger files but are searchable in Obsidian</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Database</h2>
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+        <label for="database-select" style="margin: 0;">Active Database:</label>
+        <select id="database-select" style="padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 14px;">
+          <option value="production">Production (ai-thread-hub)</option>
+          <option value="demo">Demo (ai-thread-hub-demo)</option>
+        </select>
+      </div>
+      <p class="note">Switch between production and demo databases. Demo database can be seeded with fake data for testing.</p>
+
+      <div id="demo-controls" style="margin-top: 16px; display: none;">
+        <button class="btn" id="seed-demo-data" style="background: #10b981; color: white; margin-right: 8px;">Seed Demo Data</button>
+        <button class="btn" id="clear-demo-data" style="background: #ef4444; color: white;">Clear Demo Data</button>
+        <div id="demo-stats" style="margin-top: 12px; font-size: 13px; color: #6b7280;"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Maintenance</h2>
+      <p class="note" style="margin-bottom: 16px;">Run maintenance tasks on existing data.</p>
+
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <button class="btn" id="scan-attachments" style="background: #8b5cf6; color: white;">
+          Scan Attachments
+        </button>
+        <span id="scan-attachments-status" style="font-size: 13px; color: #6b7280;"></span>
+      </div>
+      <p class="note" style="margin-top: 8px;">Analyze existing threads to detect code, docs, images, and other attachment types.</p>
+    </div>
+
+    <script type="module" src="./options.js"></script>
+  </body>
+</html>

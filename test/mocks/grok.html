@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mock Grok</title>
+</head>
+<body>
+  <!-- Sidebar with highlights/trends -->
+  <nav>
+    <div class="highlights-section">
+      <h3>Highlights</h3>
+      <a href="/highlights/hl-001">Breaking: Tech news update</a>
+      <a href="/highlights/hl-002">Sports: Championship results</a>
+    </div>
+    <div class="trends-section">
+      <h3>Trends</h3>
+      <a href="/trends/tr-001">Trending topic 1</a>
+      <a href="/trends/tr-002">Trending topic 2</a>
+    </div>
+  </nav>
+
+  <!-- Main chat area -->
+  <main>
+    <div class="conversation">
+      <!-- User message -->
+      <div class="message user-message" data-role="user">
+        <div class="message-text">What's happening in the tech world today?</div>
+      </div>
+
+      <!-- Grok response -->
+      <div class="message assistant-message" data-role="assistant">
+        <div class="message-text">
+          <p>Here's what's trending in tech right now:</p>
+          <ol>
+            <li><strong>AI Updates</strong>: New language model releases from major companies</li>
+            <li><strong>Crypto Markets</strong>: Bitcoin showing volatility after regulatory news</li>
+            <li><strong>Social Media</strong>: Platform changes affecting content creators</li>
+          </ol>
+          <p>Want me to dive deeper into any of these topics?</p>
+        </div>
+      </div>
+
+      <!-- User follow-up -->
+      <div class="message user-message" data-role="user">
+        <div class="message-text">Tell me more about the AI updates</div>
+      </div>
+
+      <!-- Grok response -->
+      <div class="message assistant-message" data-role="assistant">
+        <div class="message-text">
+          <p>Several major AI developments this week:</p>
+          <ul>
+            <li>OpenAI announced improvements to GPT-4</li>
+            <li>Google updated Gemini with new capabilities</li>
+            <li>Anthropic released Claude updates</li>
+            <li>Open source models gaining traction</li>
+          </ul>
+          <p>The competition in the AI space is heating up!</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Simulate Grok's URL structure
+    if (!window.location.hash) {
+      history.replaceState({}, '', '/#conv-grok-001');
+    }
+  </script>
+</body>
+</html>

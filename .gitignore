@@ -1,0 +1,56 @@
+# Dependencies
+node_modules/
+
+# Chrome for Testing binaries
+chrome/
+
+# Browser test profiles (contain session data)
+.test-profile/
+.test-profile-*/
+.demo-recording-profile/
+
+# Test output and fixtures (may contain session data)
+test-reports/
+test/fixtures/
+
+# Build artifacts
+dist/
+*.zip
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Local config
+.mcp.json
+.claude/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Debug captures (may contain personal data)
+dom-capture-*.json
+
+# Temporary/intermediate files
+*.tmp
+*.temp
+
+# Demo intermediate files (keep final video only)
+demo/*.webm
+demo/voiceover.mp3
+
+# Old/backup files
+*-old.html
+*-old.js
+*.bak

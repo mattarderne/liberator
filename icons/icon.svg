@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <!-- Background circle -->
+  <circle cx="64" cy="64" r="60" fill="#6366f1"/>
+
+  <!-- Central hub -->
+  <circle cx="64" cy="64" r="16" fill="#fff"/>
+
+  <!-- Connecting nodes -->
+  <circle cx="64" cy="24" r="10" fill="#fbbf24"/>
+  <circle cx="100" cy="52" r="10" fill="#34d399"/>
+  <circle cx="100" cy="88" r="10" fill="#f472b6"/>
+  <circle cx="64" cy="104" r="10" fill="#60a5fa"/>
+  <circle cx="28" cy="88" r="10" fill="#a78bfa"/>
+  <circle cx="28" cy="52" r="10" fill="#fb923c"/>
+
+  <!-- Connection lines -->
+  <line x1="64" y1="48" x2="64" y2="34" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+  <line x1="77" y1="55" x2="90" y2="52" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+  <line x1="77" y1="73" x2="90" y2="88" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+  <line x1="64" y1="80" x2="64" y2="94" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+  <line x1="51" y1="73" x2="38" y2="88" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+  <line x1="51" y1="55" x2="38" y2="52" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- AI sparkle in center -->
+  <path d="M64 56 L66 62 L72 64 L66 66 L64 72 L62 66 L56 64 L62 62 Z" fill="#6366f1"/>
+</svg>

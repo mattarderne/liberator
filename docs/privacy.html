@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy | Liberator</title>
+  <meta name="description" content="Privacy policy for Liberator - your local-first AI chat aggregator.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            background: '#F9F8F6',
+            foreground: '#1A1A1A',
+            muted: {
+              DEFAULT: '#EBE5DE',
+              foreground: '#6C6863',
+            },
+            accent: '#D4AF37',
+          },
+          fontFamily: {
+            serif: ['Playfair Display', 'serif'],
+            sans: ['Inter', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #F9F8F6;
+      color: #1A1A1A;
+    }
+
+    ::selection {
+      background-color: #D4AF37;
+      color: #F9F8F6;
+    }
+
+    /* Paper noise texture */
+    .paper-texture::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      opacity: 0.02;
+      pointer-events: none;
+      z-index: 50;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    /* Drop cap */
+    .drop-cap::first-letter {
+      float: left;
+      font-family: 'Playfair Display', serif;
+      font-size: 4rem;
+      line-height: 0.8;
+      margin-right: 0.75rem;
+      margin-top: 0.1rem;
+      color: #1A1A1A;
+    }
+  </style>
+</head>
+<body class="paper-texture">
+
+  <!-- Visible Grid Lines -->
+  <div class="hidden lg:block fixed inset-0 pointer-events-none z-40">
+    <div class="max-w-[1200px] mx-auto h-full relative">
+      <div class="absolute left-[8.33%] top-0 bottom-0 w-px bg-[#1A1A1A]/10"></div>
+      <div class="absolute left-[91.66%] top-0 bottom-0 w-px bg-[#1A1A1A]/10"></div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="border-b border-foreground/10 py-8">
+    <div class="max-w-[1200px] mx-auto px-8 md:px-16">
+      <a href="landing.html" class="font-serif text-2xl tracking-tight text-foreground hover:text-accent transition-all duration-500">Liberator</a>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="py-24 md:py-32 px-8 md:px-16">
+    <div class="max-w-[1200px] mx-auto">
+      <div class="grid grid-cols-12 gap-8">
+        <div class="col-span-12 lg:col-span-8 lg:col-start-3">
+
+          <!-- Title -->
+          <div class="mb-16">
+            <div class="flex items-center gap-4 mb-8">
+              <div class="h-px w-8 md:w-12 bg-foreground"></div>
+              <span class="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Legal</span>
+            </div>
+            <h1 class="font-serif text-4xl md:text-5xl lg:text-6xl leading-[0.95] mb-6">
+              Privacy <span class="italic text-accent">Policy</span>
+            </h1>
+            <p class="text-muted-foreground">Last updated: January 2025</p>
+          </div>
+
+          <!-- Content -->
+          <div class="space-y-16">
+
+            <!-- Introduction -->
+            <section>
+              <p class="drop-cap font-sans text-lg text-muted-foreground leading-relaxed">
+                Liberator is designed with privacy at its core. We believe your AI conversations belong to you, and only you. This policy explains how the extension handles your data, which is simple: your data stays on your device.
+              </p>
+            </section>
+
+            <!-- Data Collection -->
+            <section class="border-t border-foreground/10 pt-12">
+              <h2 class="font-serif text-2xl md:text-3xl mb-6">
+                Data <span class="italic text-accent">Collection</span>
+              </h2>
+              <div class="space-y-6 text-muted-foreground leading-relaxed">
+                <p><strong class="text-foreground">We collect nothing.</strong> Liberator does not send any data to external servers. There is no analytics, no tracking, no telemetry.</p>
+                <p>All conversation data captured by the extension is stored locally in your browser's IndexedDB storage. This data never leaves your device unless you explicitly export it.</p>
+              </div>
+            </section>
+
+            <!-- What We Access -->
+            <section class="border-t border-foreground/10 pt-12">
+              <h2 class="font-serif text-2xl md:text-3xl mb-6">
+                What We <span class="italic text-accent">Access</span>
+              </h2>
+              <div class="space-y-6 text-muted-foreground leading-relaxed">
+                <p>Liberator requires access to the following AI chat websites to read your conversation history:</p>
+                <ul class="list-none space-y-3 ml-0">
+                  <li class="flex items-start gap-3">
+                    <span class="text-accent mt-1">-</span>
+                    <span>ChatGPT (chatgpt.com, chat.openai.com)</span>
+                  </li>
+                  <li class="flex items-start gap-3">
+                    <span class="text-accent mt-1">-</span>
+                    <span>Claude (claude.ai)</span>
+                  </li>
+                  <li class="flex items-start gap-3">
+                    <span class="text-accent mt-1">-</span>
+                    <span>Gemini (gemini.google.com)</span>
+                  </li>
+                  <li class="flex items-start gap-3">
+                    <span class="text-accent mt-1">-</span>
+                    <span>Grok (grok.com, x.com)</span>
+                  </li>
+                  <li class="flex items-start gap-3">
+                    <span class="text-accent mt-1">-</span>
+                    <span>Copilot (copilot.microsoft.com)</span>
+                  </li>
+                </ul>
+                <p>This access is used solely to read and store your conversations locally. We do not modify, delete, or interact with these sites beyond reading publicly visible conversation data from your logged-in sessions.</p>
+              </div>
+            </section>
+
+            <!-- Local Storage -->
+            <section class="border-t border-foreground/10 pt-12">
+              <h2 class="font-serif text-2xl md:text-3xl mb-6">
+                Local <span class="italic text-accent">Storage</span>
+              </h2>
+              <div class="space-y-6 text-muted-foreground leading-relaxed">
+                <p>All data is stored in your browser's local IndexedDB database. This includes:</p>
+                <ul class="list-none space-y-3 ml-0">
+                  <li class="flex items-start gap-3">
+                    <span class="text-accent mt-1">-</span>
+                    <span>Conversation threads and messages</span>
+                  </li>
+                  <li class="flex items-start gap-3">
+                    <span class="text-accent mt-1">-</span>
+                    <span>AI-generated summaries (processed locally)</span>
+                  </li>
+                  <li class="flex items-start gap-3">
+                    <span class="text-accent mt-1">-</span>
+                    <span>Vector embeddings for similarity search</span>
+                  </li>
+                  <li class="flex items-start gap-3">
+                    <span class="text-accent mt-1">-</span>
+                    <span>Your settings and preferences</span>
+                  </li>
+                </ul>
+                <p>You can delete all stored data at any time through the extension's options page or by removing the extension from your browser.</p>
+              </div>
+            </section>
+
+            <!-- Third Parties -->
+            <section class="border-t border-foreground/10 pt-12">
+              <h2 class="font-serif text-2xl md:text-3xl mb-6">
+                Third <span class="italic text-accent">Parties</span>
+              </h2>
+              <div class="space-y-6 text-muted-foreground leading-relaxed">
+                <p>Liberator does not share, sell, or transfer your data to any third parties. There are no advertising partners, analytics providers, or data brokers involved.</p>
+                <p>If you choose to use optional features like OpenAI embeddings, those API calls are made directly from your browser using your own API key. We never see or store your API keys on any server.</p>
+              </div>
+            </section>
+
+            <!-- Open Source -->
+            <section class="border-t border-foreground/10 pt-12">
+              <h2 class="font-serif text-2xl md:text-3xl mb-6">
+                Open <span class="italic text-accent">Source</span>
+              </h2>
+              <div class="space-y-6 text-muted-foreground leading-relaxed">
+                <p>Liberator is open source. You can audit the code yourself to verify these privacy claims. We believe transparency is essential for trust.</p>
+              </div>
+            </section>
+
+            <!-- Contact -->
+            <section class="border-t border-foreground/10 pt-12">
+              <h2 class="font-serif text-2xl md:text-3xl mb-6">
+                <span class="italic text-accent">Contact</span>
+              </h2>
+              <div class="space-y-6 text-muted-foreground leading-relaxed">
+                <p>If you have questions about this privacy policy or how Liberator handles your data, please open an issue on our GitHub repository.</p>
+              </div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="py-12 border-t border-foreground/10">
+    <div class="max-w-[1200px] mx-auto px-8 md:px-16 text-center">
+      <p class="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+        2025 Liberator. Local-first. Privacy-respecting. Open source.
+      </p>
+    </div>
+  </footer>
+
+</body>
+</html>
