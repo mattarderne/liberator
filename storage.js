@@ -214,9 +214,31 @@ async function listThreads(filters = {}) {
         }
         cursor.continue();
       } else {
-        resolve(results);
+        // Deduplicate by provider + provider_thread_id, keeping most recent
+        resolve(deduplicateThreadsList(results));
       }
     };
+  });
+}
+
+/**
+ * Deduplicate threads by provider + provider_thread_id
+ * Keeps the most recently synced version
+ */
+function deduplicateThreadsList(threads) {
+  if (!threads || threads.length === 0) return [];
+
+  // Sort by last_synced_at descending so we keep the most recent
+  threads.sort((a, b) =>
+    new Date(b.last_synced_at || 0) - new Date(a.last_synced_at || 0)
+  );
+
+  const seen = new Map();
+  return threads.filter(thread => {
+    const key = `${thread.provider}:${thread.provider_thread_id}`;
+    if (seen.has(key)) return false;
+    seen.set(key, true);
+    return true;
   });
 }
 

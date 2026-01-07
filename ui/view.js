@@ -213,7 +213,6 @@ async function loadThreads() {
       });
     }
     allThreads = response?.threads || [];
-
     applyFiltersAndSort();
     renderCurrentView();
   } catch (err) {
