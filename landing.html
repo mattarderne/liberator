@@ -701,27 +701,6 @@
             Configure your remix and copy the prompt to paste into Claude Code or your preferred AI assistant.
           </p>
 
-          <!-- Platform Selection -->
-          <div>
-            <label class="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-4 block">Platform</label>
-            <div class="flex gap-4">
-              <label class="flex-1 border border-foreground/20 p-4 cursor-pointer hover:border-accent transition-colors has-[:checked]:border-accent has-[:checked]:bg-accent/5">
-                <input type="radio" name="platform" value="chrome" class="sr-only" checked>
-                <div class="flex items-center gap-3">
-                  <svg class="w-6 h-6 text-foreground" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="12" r="4"/></svg>
-                  <span class="font-medium">Chrome</span>
-                </div>
-              </label>
-              <label class="flex-1 border border-foreground/20 p-4 cursor-pointer hover:border-accent transition-colors has-[:checked]:border-accent has-[:checked]:bg-accent/5">
-                <input type="radio" name="platform" value="firefox" class="sr-only">
-                <div class="flex items-center gap-3">
-                  <svg class="w-6 h-6 text-foreground" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 6v6l4 2"/></svg>
-                  <span class="font-medium">Firefox</span>
-                </div>
-              </label>
-            </div>
-          </div>
-
           <!-- Provider Selection -->
           <div>
             <label class="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-4 block">AI Providers</label>
@@ -874,11 +853,10 @@
     const providerAll = document.getElementById('provider-all');
 
     function generatePrompt() {
-      const platform = document.querySelector('input[name="platform"]:checked')?.value || 'chrome';
       const providers = [];
 
       if (providerAll.checked) {
-        providers.push('ChatGPT', 'Claude', 'Gemini', 'Grok', 'Copilot');
+        providers.push('ChatGPT', 'Claude', 'Gemini');
       } else {
         if (document.getElementById('provider-chatgpt').checked) providers.push('ChatGPT');
         if (document.getElementById('provider-claude').checked) providers.push('Claude');
@@ -886,238 +864,721 @@
       }
 
       const providersStr = providers.length > 0 ? providers.join(', ') : 'ChatGPT, Claude, Gemini';
-      const isChrome = platform === 'chrome';
 
-      return `# Remix: AI Chat Liberator
+      return `# Build: AI Chat Liberator (Chrome Extension)
 
-Build a ${isChrome ? 'Chrome (Manifest V3)' : 'Firefox'} extension that extracts conversations from AI chat platforms (${providersStr}) into a local-first searchable database.
+Create a Chrome extension that extracts conversations from ${providersStr} into a local searchable database. This should be a complete, working MVP.
 
-## Project Structure
-\`\`\`
-my-liberator/
-├── manifest.json          # ${isChrome ? 'Manifest V3' : 'Manifest V2/V3'}
-├── background.js          # Service worker for sync coordination
-├── storage.js             # IndexedDB wrapper
-├── content/               # Provider-specific extractors
-│   ├── chatgpt.js
-│   ├── claude.js
-│   └── gemini.js
-├── ui/
-│   ├── popup.html         # Quick search popup
-│   ├── popup.js
-│   ├── search.html        # Full-page search
-│   └── search.js
-└── icons/
+## Step 1: Create Project Structure
+
+\`\`\`bash
+mkdir liberator && cd liberator
+mkdir -p content ui icons
 \`\`\`
 
-## Provider URL Patterns & Selectors
+## Step 2: manifest.json
 
-### ChatGPT (chatgpt.com, chat.openai.com)
-\`\`\`javascript
-// URL pattern: https://chatgpt.com/c/{conversation-id}
-// Sidebar: nav [data-testid="conversation-item"]
-// Messages: [data-message-author-role="user"], [data-message-author-role="assistant"]
-// Title: [data-testid="conversation-title"] or first user message
-// Extract thread ID from URL: /c/([a-f0-9-]+)/
-\`\`\`
-
-### Claude (claude.ai)
-\`\`\`javascript
-// URL pattern: https://claude.ai/chat/{uuid}
-// Sidebar: [data-testid="chat-list-item"], a[href^="/chat/"]
-// Messages: [data-testid="user-message"], [data-testid="assistant-message"]
-// Alternative: .font-user-message, .font-claude-message
-// Extract thread ID from URL: /chat/([a-f0-9-]+)/
-\`\`\`
-
-### Gemini (gemini.google.com)
-\`\`\`javascript
-// URL pattern: https://gemini.google.com/app/{id}
-// Sidebar: .conversation-list-item, mat-list-item
-// Messages: .user-query, .model-response-text
-// Title: .conversation-title or first query
-// Extract thread ID from URL: /app/([a-f0-9]+)/
-\`\`\`
-
-## Sync Mechanism (Two-Phase)
-
-### Phase 1: Discovery (Sidebar Scan)
-\`\`\`javascript
-async function discoverThreads() {
-  const threads = [];
-  const sidebar = document.querySelector('nav, .sidebar, [role="navigation"]');
-
-  sidebar.querySelectorAll('[data-testid="conversation-item"], a[href*="/c/"], a[href*="/chat/"]')
-    .forEach(item => {
-      threads.push({
-        id: extractIdFromUrl(item.href),
-        title: item.textContent.trim().slice(0, 100),
-        url: item.href,
-        provider: detectProvider(),
-        discovered_at: Date.now()
-      });
-    });
-
-  return threads;
-}
-\`\`\`
-
-### Phase 2: Deep Sync (Content Extraction)
-\`\`\`javascript
-async function extractConversation(threadId) {
-  const messages = [];
-  const container = document.querySelector('main, [role="main"], .conversation-container');
-
-  container.querySelectorAll('[data-message-author-role], .message').forEach((el, i) => {
-    const role = el.dataset.messageAuthorRole ||
-                 (el.classList.contains('user') ? 'user' : 'assistant');
-    messages.push({
-      id: \`\${threadId}-\${i}\`,
-      thread_id: threadId,
-      role: role,
-      text: el.innerText.trim(),
-      created_at: Date.now()
-    });
-  });
-
-  // Content hash for deduplication
-  const contentHash = await hashContent(messages.map(m => m.text).join(''));
-
-  return { messages, contentHash };
-}
-\`\`\`
-
-### Background Sync Coordinator
-\`\`\`javascript
-// In background.js (service worker)
-chrome.runtime.onMessage.addListener((msg, sender, respond) => {
-  if (msg.type === 'SYNC_THREAD') {
-    storage.upsertThread(msg.thread);
-    storage.upsertMessages(msg.messages);
-    respond({ success: true });
-  }
-});
-
-// Sync queue with retry
-const syncQueue = new Map();
-async function processSyncQueue() {
-  for (const [id, task] of syncQueue) {
-    try {
-      await syncThread(task);
-      syncQueue.delete(id);
-    } catch (e) {
-      task.retries = (task.retries || 0) + 1;
-      if (task.retries > 3) syncQueue.delete(id);
+\`\`\`json
+{
+  "manifest_version": 3,
+  "name": "Liberator",
+  "version": "1.0.0",
+  "description": "Free your AI chats from walled gardens",
+  "permissions": ["storage", "activeTab", "tabs"],
+  "host_permissions": [
+    "https://chatgpt.com/*",
+    "https://chat.openai.com/*",
+    "https://claude.ai/*",
+    "https://gemini.google.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://chatgpt.com/*", "https://chat.openai.com/*"],
+      "js": ["content/chatgpt.js"]
+    },
+    {
+      "matches": ["https://claude.ai/*"],
+      "js": ["content/claude.js"]
+    },
+    {
+      "matches": ["https://gemini.google.com/*"],
+      "js": ["content/gemini.js"]
+    }
+  ],
+  "action": {
+    "default_popup": "ui/popup.html",
+    "default_icon": {
+      "48": "icons/icon48.png"
     }
   }
 }
 \`\`\`
 
-## Storage Schema (IndexedDB)
+## Step 3: storage.js - Complete IndexedDB Implementation
 
 \`\`\`javascript
+// storage.js - IndexedDB wrapper with full CRUD
 const DB_NAME = 'liberator';
-const STORES = {
-  threads: { keyPath: 'id', indexes: ['provider', 'updated_at', 'title'] },
-  messages: { keyPath: 'id', indexes: ['thread_id', 'created_at'] }
-};
+const DB_VERSION = 1;
 
-// Thread object
-{
-  id: 'chatgpt-abc123',
-  provider: 'chatgpt',
-  title: 'API integration help',
-  url: 'https://chatgpt.com/c/abc123',
-  message_count: 12,
-  first_message_at: 1704067200000,
-  last_synced_at: 1704153600000,
-  content_hash: 'sha256...',
-  searchable_content: 'full text for search...'
+class Storage {
+  constructor() {
+    this.db = null;
+  }
+
+  async init() {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => {
+        this.db = request.result;
+        resolve(this);
+      };
+
+      request.onupgradeneeded = (e) => {
+        const db = e.target.result;
+
+        // Threads store
+        if (!db.objectStoreNames.contains('threads')) {
+          const threads = db.createObjectStore('threads', { keyPath: 'id' });
+          threads.createIndex('provider', 'provider', { unique: false });
+          threads.createIndex('updated_at', 'updated_at', { unique: false });
+        }
+
+        // Messages store
+        if (!db.objectStoreNames.contains('messages')) {
+          const messages = db.createObjectStore('messages', { keyPath: 'id' });
+          messages.createIndex('thread_id', 'thread_id', { unique: false });
+        }
+      };
+    });
+  }
+
+  async upsertThread(thread) {
+    const tx = this.db.transaction('threads', 'readwrite');
+    const store = tx.objectStore('threads');
+    thread.updated_at = Date.now();
+    store.put(thread);
+    return new Promise((resolve, reject) => {
+      tx.oncomplete = () => resolve(thread);
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+
+  async upsertMessages(messages) {
+    const tx = this.db.transaction('messages', 'readwrite');
+    const store = tx.objectStore('messages');
+    messages.forEach(m => store.put(m));
+    return new Promise((resolve, reject) => {
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+
+  async getAllThreads(provider = null) {
+    const tx = this.db.transaction('threads', 'readonly');
+    const store = tx.objectStore('threads');
+
+    return new Promise((resolve, reject) => {
+      const request = provider
+        ? store.index('provider').getAll(provider)
+        : store.getAll();
+      request.onsuccess = () => {
+        const results = request.result.sort((a, b) => b.updated_at - a.updated_at);
+        resolve(results);
+      };
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async searchThreads(query) {
+    const threads = await this.getAllThreads();
+    if (!query) return threads.slice(0, 50);
+
+    const q = query.toLowerCase();
+    return threads.filter(t =>
+      t.title?.toLowerCase().includes(q) ||
+      t.searchable_content?.toLowerCase().includes(q)
+    ).slice(0, 50);
+  }
+
+  async getMessages(threadId) {
+    const tx = this.db.transaction('messages', 'readonly');
+    const store = tx.objectStore('messages');
+    const index = store.index('thread_id');
+
+    return new Promise((resolve, reject) => {
+      const request = index.getAll(threadId);
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  }
+}
+
+// Export for use in other scripts
+if (typeof window !== 'undefined') {
+  window.Storage = Storage;
 }
 \`\`\`
 
-## Popup UI (Minimal)
-
-\`\`\`html
-<!-- popup.html - 360x480px -->
-<div class="container">
-  <input type="search" id="search" placeholder="Search conversations..." autofocus>
-  <div class="filters">
-    <button data-provider="">All</button>
-    <button data-provider="chatgpt">ChatGPT</button>
-    <button data-provider="claude">Claude</button>
-  </div>
-  <div id="results"></div>
-</div>
-\`\`\`
+## Step 4: background.js - Service Worker
 
 \`\`\`javascript
-// popup.js - instant search
-const search = document.getElementById('search');
-search.addEventListener('input', async (e) => {
-  const query = e.target.value;
-  const results = await storage.searchThreads(query, { limit: 20 });
-  renderResults(results);
+// background.js - Handles messages from content scripts and popup
+importScripts('storage.js');
+
+let storage = null;
+
+async function getStorage() {
+  if (!storage) {
+    storage = new Storage();
+    await storage.init();
+  }
+  return storage;
+}
+
+// Message handler
+chrome.runtime.onMessage.addListener((msg, sender, respond) => {
+  handleMessage(msg, sender).then(respond);
+  return true; // Keep channel open for async response
 });
 
-// Keyboard navigation
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'ArrowDown') selectNext();
-  if (e.key === 'ArrowUp') selectPrev();
-  if (e.key === 'Enter') openSelected();
-});
-\`\`\`
+async function handleMessage(msg, sender) {
+  const db = await getStorage();
 
-## Manifest (${isChrome ? 'V3' : 'V2/V3'})
+  switch (msg.type) {
+    case 'SYNC_THREAD':
+      await db.upsertThread(msg.thread);
+      if (msg.messages?.length) {
+        await db.upsertMessages(msg.messages);
+      }
+      return { success: true };
 
-\`\`\`json
-{
-  "manifest_version": ${isChrome ? 3 : 2},
-  "name": "My Liberator",
-  "version": "1.0.0",
-  "permissions": ["storage", "activeTab"],
-  "host_permissions": [
-    "https://chatgpt.com/*",
-    "https://claude.ai/*",
-    "https://gemini.google.com/*"
-  ],
-  ${isChrome ? '"background": { "service_worker": "background.js" }' : '"background": { "scripts": ["background.js"] }'},
-  "content_scripts": [{
-    "matches": ["https://chatgpt.com/*", "https://claude.ai/*", "https://gemini.google.com/*"],
-    "js": ["content/chatgpt.js", "content/claude.js", "content/gemini.js"]
-  }],
-  "action": {
-    "default_popup": "ui/popup.html",
-    "default_icon": "icons/icon48.png"
+    case 'GET_THREADS':
+      return await db.getAllThreads(msg.provider);
+
+    case 'SEARCH':
+      return await db.searchThreads(msg.query);
+
+    case 'GET_MESSAGES':
+      return await db.getMessages(msg.threadId);
+
+    case 'TRIGGER_SYNC':
+      // Tell content script on active tab to sync
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (tab?.id) {
+        try {
+          await chrome.tabs.sendMessage(tab.id, { type: 'DO_SYNC' });
+        } catch (e) {
+          console.log('No content script on this page');
+        }
+      }
+      return { triggered: true };
+
+    default:
+      return { error: 'Unknown message type' };
   }
 }
 \`\`\`
 
-## Implementation Order
-1. Set up manifest and basic extension structure
-2. Implement IndexedDB storage layer
-3. Build ChatGPT content script (best documented selectors)
-4. Add popup with search
-5. Extend to Claude, then Gemini
-6. Add full-page search view
+## Step 5: content/chatgpt.js - ChatGPT Extractor
 
-## Platform: ${isChrome ? 'Chrome (Manifest V3)' : 'Firefox'}
-## Providers: ${providersStr}
+\`\`\`javascript
+// content/chatgpt.js - Extract conversations from ChatGPT
+(function() {
+  const PROVIDER = 'chatgpt';
+
+  function getThreadId() {
+    const match = window.location.pathname.match(/\\/c\\/([a-f0-9-]+)/);
+    return match ? match[1] : null;
+  }
+
+  function getTitle() {
+    // Try multiple selectors as ChatGPT UI changes frequently
+    const selectors = [
+      '[data-testid="conversation-title"]',
+      'h1',
+      '.text-lg.font-semibold'
+    ];
+    for (const sel of selectors) {
+      const el = document.querySelector(sel);
+      if (el?.textContent?.trim()) return el.textContent.trim().slice(0, 100);
+    }
+    return 'Untitled Chat';
+  }
+
+  function extractMessages() {
+    const messages = [];
+    const containers = document.querySelectorAll('[data-message-author-role]');
+
+    containers.forEach((el, i) => {
+      const role = el.dataset.messageAuthorRole;
+      const textEl = el.querySelector('.markdown, .whitespace-pre-wrap');
+      const text = textEl?.innerText?.trim() || el.innerText?.trim() || '';
+
+      if (text) {
+        messages.push({
+          id: \`\${getThreadId()}-\${i}\`,
+          thread_id: getThreadId(),
+          role: role,
+          text: text,
+          created_at: Date.now()
+        });
+      }
+    });
+
+    return messages;
+  }
+
+  async function sync() {
+    const threadId = getThreadId();
+    if (!threadId) {
+      console.log('[Liberator] Not on a conversation page');
+      return;
+    }
+
+    const messages = extractMessages();
+    const thread = {
+      id: \`\${PROVIDER}-\${threadId}\`,
+      provider: PROVIDER,
+      title: getTitle(),
+      url: window.location.href,
+      message_count: messages.length,
+      updated_at: Date.now(),
+      searchable_content: messages.map(m => m.text).join(' ').slice(0, 10000)
+    };
+
+    console.log('[Liberator] Syncing:', thread.title, '-', messages.length, 'messages');
+
+    await chrome.runtime.sendMessage({
+      type: 'SYNC_THREAD',
+      thread,
+      messages
+    });
+  }
+
+  // Listen for sync trigger from popup
+  chrome.runtime.onMessage.addListener((msg, sender, respond) => {
+    if (msg.type === 'DO_SYNC') {
+      sync().then(() => respond({ done: true }));
+      return true;
+    }
+  });
+
+  // Auto-sync on page load after a delay
+  setTimeout(sync, 2000);
+})();
+\`\`\`
+
+## Step 6: content/claude.js - Claude Extractor
+
+\`\`\`javascript
+// content/claude.js - Extract conversations from Claude
+(function() {
+  const PROVIDER = 'claude';
+
+  function getThreadId() {
+    const match = window.location.pathname.match(/\\/chat\\/([a-f0-9-]+)/);
+    return match ? match[1] : null;
+  }
+
+  function getTitle() {
+    const selectors = [
+      '[data-testid="chat-title"]',
+      '.font-tiempos',
+      'h1'
+    ];
+    for (const sel of selectors) {
+      const el = document.querySelector(sel);
+      if (el?.textContent?.trim()) return el.textContent.trim().slice(0, 100);
+    }
+    return 'Untitled Chat';
+  }
+
+  function extractMessages() {
+    const messages = [];
+    // Claude uses different classes for user vs assistant
+    const userMsgs = document.querySelectorAll('[data-testid="user-message"], .font-user-message');
+    const assistantMsgs = document.querySelectorAll('[data-testid="assistant-message"], .font-claude-message');
+
+    // Combine and sort by position in DOM
+    const allEls = [...document.querySelectorAll('[data-testid*="message"], .font-user-message, .font-claude-message')];
+
+    allEls.forEach((el, i) => {
+      const isUser = el.matches('[data-testid="user-message"], .font-user-message');
+      const text = el.innerText?.trim() || '';
+
+      if (text) {
+        messages.push({
+          id: \`\${getThreadId()}-\${i}\`,
+          thread_id: getThreadId(),
+          role: isUser ? 'user' : 'assistant',
+          text: text,
+          created_at: Date.now()
+        });
+      }
+    });
+
+    return messages;
+  }
+
+  async function sync() {
+    const threadId = getThreadId();
+    if (!threadId) return;
+
+    const messages = extractMessages();
+    const thread = {
+      id: \`\${PROVIDER}-\${threadId}\`,
+      provider: PROVIDER,
+      title: getTitle(),
+      url: window.location.href,
+      message_count: messages.length,
+      updated_at: Date.now(),
+      searchable_content: messages.map(m => m.text).join(' ').slice(0, 10000)
+    };
+
+    console.log('[Liberator] Syncing:', thread.title);
+
+    await chrome.runtime.sendMessage({
+      type: 'SYNC_THREAD',
+      thread,
+      messages
+    });
+  }
+
+  chrome.runtime.onMessage.addListener((msg, sender, respond) => {
+    if (msg.type === 'DO_SYNC') {
+      sync().then(() => respond({ done: true }));
+      return true;
+    }
+  });
+
+  setTimeout(sync, 2000);
+})();
+\`\`\`
+
+## Step 7: content/gemini.js - Gemini Extractor
+
+\`\`\`javascript
+// content/gemini.js - Extract conversations from Gemini
+(function() {
+  const PROVIDER = 'gemini';
+
+  function getThreadId() {
+    const match = window.location.pathname.match(/\\/app\\/([a-f0-9]+)/);
+    return match ? match[1] : null;
+  }
+
+  function getTitle() {
+    const el = document.querySelector('.conversation-title, h1');
+    return el?.textContent?.trim()?.slice(0, 100) || 'Gemini Chat';
+  }
+
+  function extractMessages() {
+    const messages = [];
+    const turns = document.querySelectorAll('.conversation-turn, .query-content, .response-content');
+
+    turns.forEach((el, i) => {
+      const isUser = el.matches('.query-content, .user-query');
+      const text = el.innerText?.trim() || '';
+
+      if (text) {
+        messages.push({
+          id: \`\${getThreadId()}-\${i}\`,
+          thread_id: getThreadId(),
+          role: isUser ? 'user' : 'assistant',
+          text: text,
+          created_at: Date.now()
+        });
+      }
+    });
+
+    return messages;
+  }
+
+  async function sync() {
+    const threadId = getThreadId();
+    if (!threadId) return;
+
+    const messages = extractMessages();
+    const thread = {
+      id: \`\${PROVIDER}-\${threadId}\`,
+      provider: PROVIDER,
+      title: getTitle(),
+      url: window.location.href,
+      message_count: messages.length,
+      updated_at: Date.now(),
+      searchable_content: messages.map(m => m.text).join(' ').slice(0, 10000)
+    };
+
+    console.log('[Liberator] Syncing:', thread.title);
+
+    await chrome.runtime.sendMessage({
+      type: 'SYNC_THREAD',
+      thread,
+      messages
+    });
+  }
+
+  chrome.runtime.onMessage.addListener((msg, sender, respond) => {
+    if (msg.type === 'DO_SYNC') {
+      sync().then(() => respond({ done: true }));
+      return true;
+    }
+  });
+
+  setTimeout(sync, 2000);
+})();
+\`\`\`
+
+## Step 8: ui/popup.html - Popup Interface
+
+\`\`\`html
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      width: 380px;
+      max-height: 500px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #1a1a1a;
+      color: #fff;
+    }
+    .header {
+      padding: 16px;
+      border-bottom: 1px solid #333;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .header h1 { font-size: 16px; flex: 1; }
+    .sync-btn {
+      background: #d4a574;
+      color: #1a1a1a;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .sync-btn:hover { background: #c4956a; }
+    .search-box {
+      padding: 12px 16px;
+      border-bottom: 1px solid #333;
+    }
+    .search-box input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #444;
+      border-radius: 6px;
+      background: #2a2a2a;
+      color: #fff;
+      font-size: 14px;
+    }
+    .search-box input:focus { outline: none; border-color: #d4a574; }
+    .filters {
+      padding: 8px 16px;
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid #333;
+    }
+    .filter-btn {
+      padding: 6px 12px;
+      border: 1px solid #444;
+      border-radius: 4px;
+      background: transparent;
+      color: #888;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .filter-btn.active { background: #d4a574; color: #1a1a1a; border-color: #d4a574; }
+    .results {
+      max-height: 340px;
+      overflow-y: auto;
+    }
+    .thread {
+      padding: 12px 16px;
+      border-bottom: 1px solid #2a2a2a;
+      cursor: pointer;
+    }
+    .thread:hover { background: #2a2a2a; }
+    .thread-title {
+      font-size: 14px;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .thread-meta {
+      font-size: 11px;
+      color: #666;
+      display: flex;
+      gap: 8px;
+    }
+    .provider-badge {
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .provider-chatgpt { background: #10a37f; }
+    .provider-claude { background: #d4a574; color: #1a1a1a; }
+    .provider-gemini { background: #4285f4; }
+    .empty {
+      padding: 40px 16px;
+      text-align: center;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Liberator</h1>
+    <button class="sync-btn" id="sync-btn">Sync</button>
+  </div>
+  <div class="search-box">
+    <input type="text" id="search" placeholder="Search conversations..." autofocus>
+  </div>
+  <div class="filters">
+    <button class="filter-btn active" data-provider="">All</button>
+    <button class="filter-btn" data-provider="chatgpt">ChatGPT</button>
+    <button class="filter-btn" data-provider="claude">Claude</button>
+    <button class="filter-btn" data-provider="gemini">Gemini</button>
+  </div>
+  <div class="results" id="results">
+    <div class="empty">Click Sync on a chat page to get started</div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
+\`\`\`
+
+## Step 9: ui/popup.js - Popup Logic
+
+\`\`\`javascript
+// popup.js
+const searchInput = document.getElementById('search');
+const resultsDiv = document.getElementById('results');
+const syncBtn = document.getElementById('sync-btn');
+const filterBtns = document.querySelectorAll('.filter-btn');
+
+let currentProvider = '';
+
+async function loadThreads(query = '', provider = '') {
+  const response = query
+    ? await chrome.runtime.sendMessage({ type: 'SEARCH', query })
+    : await chrome.runtime.sendMessage({ type: 'GET_THREADS', provider: provider || null });
+
+  renderThreads(response || []);
+}
+
+function renderThreads(threads) {
+  if (!threads.length) {
+    resultsDiv.innerHTML = '<div class="empty">No conversations found</div>';
+    return;
+  }
+
+  resultsDiv.innerHTML = threads.map(t => \`
+    <div class="thread" data-url="\${t.url}">
+      <div class="thread-title">\${escapeHtml(t.title)}</div>
+      <div class="thread-meta">
+        <span class="provider-badge provider-\${t.provider}">\${t.provider}</span>
+        <span>\${t.message_count || 0} messages</span>
+        <span>\${formatDate(t.updated_at)}</span>
+      </div>
+    </div>
+  \`).join('');
+}
+
+function escapeHtml(str) {
+  return str?.replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  })[c]) || '';
+}
+
+function formatDate(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  const now = new Date();
+  const diff = now - d;
+  if (diff < 86400000) return 'Today';
+  if (diff < 172800000) return 'Yesterday';
+  return d.toLocaleDateString();
+}
+
+// Event listeners
+searchInput.addEventListener('input', (e) => {
+  loadThreads(e.target.value, currentProvider);
+});
+
+filterBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    filterBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentProvider = btn.dataset.provider;
+    loadThreads(searchInput.value, currentProvider);
+  });
+});
+
+resultsDiv.addEventListener('click', (e) => {
+  const thread = e.target.closest('.thread');
+  if (thread?.dataset.url) {
+    chrome.tabs.create({ url: thread.dataset.url });
+  }
+});
+
+syncBtn.addEventListener('click', async () => {
+  syncBtn.textContent = 'Syncing...';
+  syncBtn.disabled = true;
+  await chrome.runtime.sendMessage({ type: 'TRIGGER_SYNC' });
+  setTimeout(() => {
+    syncBtn.textContent = 'Sync';
+    syncBtn.disabled = false;
+    loadThreads(searchInput.value, currentProvider);
+  }, 1500);
+});
+
+// Initial load
+loadThreads();
+\`\`\`
+
+## Step 10: Create Icon
+
+Create a simple 48x48 icon at \`icons/icon48.png\`. You can use any image or generate a simple SVG-based icon.
+
+## Step 11: Load & Test
+
+1. Open \`chrome://extensions\`
+2. Enable "Developer mode"
+3. Click "Load unpacked" → select your \`liberator\` folder
+4. Open ChatGPT/Claude/Gemini
+5. Click the extension icon → Click "Sync"
+6. Search your conversations!
 
 ---
+
+## Providers: ${providersStr}
 
 ## Final Task: Contribute Back
 
 After your implementation works, review the original at:
-https://github.com/mattarderne/liberator
+**https://github.com/mattarderne/liberator**
 
 Then create a PR with:
-1. **Prompt improvements** - What was unclear or missing?
-2. **Selector updates** - Did the AI sites change their DOM?
-3. **New patterns** - Better approaches you discovered?
-4. **New providers** - Added Grok, Copilot, or others?
+1. **Prompt improvements** - What was unclear? What did you have to figure out?
+2. **Selector updates** - Did the AI sites change their DOM structure?
+3. **Bug fixes** - What didn't work that you fixed?
+4. **New features** - What did you add?
 
-This is Open Ideas in action - each remix improves the source.`;
+This is **Open Ideas** - each remix improves the source prompt for the next builder.`;
     }
 
     function updatePromptPreview() {

@@ -223,23 +223,34 @@ async function listThreads(filters = {}) {
 
 /**
  * Deduplicate threads by provider + provider_thread_id
- * Keeps the most recently synced version
+ * Keeps the best version (most messages, then most recently synced)
  */
 function deduplicateThreadsList(threads) {
   if (!threads || threads.length === 0) return [];
 
-  // Sort by last_synced_at descending so we keep the most recent
-  threads.sort((a, b) =>
-    new Date(b.last_synced_at || 0) - new Date(a.last_synced_at || 0)
-  );
+  const bestByKey = new Map();
 
-  const seen = new Map();
-  return threads.filter(thread => {
+  for (const thread of threads) {
     const key = `${thread.provider}:${thread.provider_thread_id}`;
-    if (seen.has(key)) return false;
-    seen.set(key, true);
-    return true;
-  });
+    const existing = bestByKey.get(key);
+
+    if (!existing) {
+      bestByKey.set(key, thread);
+    } else {
+      // Prefer thread with more messages, then more recent sync
+      const existingCount = existing.message_count || 0;
+      const threadCount = thread.message_count || 0;
+      const existingSync = new Date(existing.last_synced_at || 0);
+      const threadSync = new Date(thread.last_synced_at || 0);
+
+      if (threadCount > existingCount ||
+          (threadCount === existingCount && threadSync > existingSync)) {
+        bestByKey.set(key, thread);
+      }
+    }
+  }
+
+  return Array.from(bestByKey.values());
 }
 
 async function updateThreadField(threadId, updates) {
