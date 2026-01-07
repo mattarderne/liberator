@@ -201,7 +201,7 @@ function extractProjectName(filePath, cwd) {
   const match = filePath.match(/projects\/([^/]+)\//);
   if (match) {
     // Convert hash path back to readable name
-    // e.g., "-Users-mattbook-air-claude-stuff" -> "claude-stuff"
+    // e.g., "-Users-username-my-project" -> "my-project"
     const hashPath = match[1];
     const parts = hashPath.split('-').filter(p => p);
     return parts[parts.length - 1] || hashPath;
