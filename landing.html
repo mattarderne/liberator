@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Liberator | Set your AI chats free</title>
   <meta name="description" content="Your conversations are trapped. Liberator unifies them all in one searchable, local database.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%231A1A1A'/><path d='M30 70V30l40 40H30z' fill='%23D4AF37'/></svg>">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -124,6 +125,17 @@
     }
     .group:hover .image-luxury {
       filter: grayscale(0);
+    }
+
+    /* Prompt section accordion */
+    .prompt-section .section-content {
+      display: none;
+    }
+    .prompt-section.open .section-content {
+      display: block;
+    }
+    .prompt-section.open .section-chevron {
+      transform: rotate(180deg);
     }
   </style>
 </head>
@@ -738,10 +750,12 @@
 
           <!-- Prompt Preview -->
           <div>
-            <label class="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-4 block">Generated Prompt</label>
-            <div class="bg-foreground text-background p-6 font-mono text-sm max-h-64 overflow-y-auto" id="prompt-preview">
-              <!-- Filled by JS -->
+            <label class="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-4 block">Generated Prompt (11 Steps)</label>
+            <div class="border border-foreground/20 max-h-80 overflow-y-auto" id="prompt-sections">
+              <!-- Filled by JS with collapsible sections -->
             </div>
+            <!-- Hidden full prompt for copying -->
+            <div id="prompt-full" class="hidden"></div>
           </div>
         </div>
 
@@ -849,7 +863,8 @@
     const remixClose = document.getElementById('remix-close');
     const remixBackdrop = document.getElementById('remix-backdrop');
     const copyPromptBtn = document.getElementById('copy-prompt-btn');
-    const promptPreview = document.getElementById('prompt-preview');
+    const promptSections = document.getElementById('prompt-sections');
+    const promptFull = document.getElementById('prompt-full');
     const providerAll = document.getElementById('provider-all');
 
     function generatePrompt() {
@@ -1583,7 +1598,46 @@ This is **Open Ideas** - each remix improves the source prompt for the next buil
 
     function updatePromptPreview() {
       const prompt = generatePrompt();
-      promptPreview.textContent = prompt;
+      promptFull.textContent = prompt;
+
+      // Parse into sections (split by ## Step X:)
+      const sections = prompt.split(/(?=## Step \d+:)/);
+      const intro = sections.shift(); // First part before Step 1
+
+      let html = `<div class="p-3 bg-foreground/5 border-b border-foreground/10 text-xs text-muted-foreground font-mono">${intro.trim().split('\n').slice(0, 3).join('<br>')}</div>`;
+
+      sections.forEach((section, i) => {
+        const lines = section.trim().split('\n');
+        const title = lines[0].replace('## ', '');
+        const hasCode = section.includes('```');
+        const lineCount = section.split('\n').length;
+
+        html += `
+          <div class="prompt-section border-b border-foreground/10 last:border-b-0">
+            <button class="w-full p-3 flex items-center justify-between hover:bg-foreground/5 transition-colors text-left" onclick="this.parentElement.classList.toggle('open')">
+              <div class="flex items-center gap-3">
+                <span class="w-6 h-6 bg-foreground text-background flex items-center justify-center text-xs font-bold flex-shrink-0">${i + 1}</span>
+                <span class="font-medium text-sm">${title.replace(/^Step \d+:\s*/, '')}</span>
+              </div>
+              <div class="flex items-center gap-2 text-xs text-muted-foreground">
+                ${hasCode ? '<span class="bg-accent/20 text-accent px-1.5 py-0.5 rounded text-[10px]">CODE</span>' : ''}
+                <span>${lineCount} lines</span>
+                <svg class="w-4 h-4 transition-transform section-chevron" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+              </div>
+            </button>
+            <div class="section-content hidden">
+              <pre class="p-3 bg-foreground text-background text-xs overflow-x-auto whitespace-pre-wrap font-mono">${escapeHtml(lines.slice(1).join('\n').trim())}</pre>
+            </div>
+          </div>`;
+      });
+
+      promptSections.innerHTML = html;
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
     }
 
     function openModal() {
