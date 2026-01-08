@@ -224,6 +224,13 @@ async function listThreads(filters = {}) {
 /**
  * Deduplicate threads by provider + provider_thread_id
  * Keeps the best version (most messages, then most recently synced)
+ *
+ * TODO: Revisit this deduplication approach. Current issues:
+ * - Query-time dedupe means duplicate threads still exist in DB
+ * - Messages are stored by thread.id, not provider_thread_id, so duplicates
+ *   may have messages under different IDs
+ * - Should consider merging messages from duplicates before cleanup
+ * - Or prevent duplicates at insert time via getThreadByProviderId
  */
 function deduplicateThreadsList(threads) {
   if (!threads || threads.length === 0) return [];

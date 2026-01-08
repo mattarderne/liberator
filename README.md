@@ -24,6 +24,12 @@ Your ideas are scattered across AI walled gardens. Liberator brings them togethe
 - **Trend Visualizations** - Track your AI usage patterns over time
 - **OpenAI Classification** - Automatic summaries and categorization (optional)
 
+### Experimental (Untested)
+- **Claude Code Import** - Import sessions from Claude Code CLI (`~/.claude/projects/`)
+  - Manual import via folder picker in Settings
+  - Native messaging host for continuous sync (requires setup)
+  - See `native-host/` folder for installation instructions
+
 ### Demo Mode
 - **Try Without Risk** - 75 realistic demo threads
 - **Separate Database** - Demo data never mixes with real data
